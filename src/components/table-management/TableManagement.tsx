@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Users, Clock } from "lucide-react";
@@ -5,7 +6,7 @@ import { AddTableDialog } from "./AddTableDialog";
 import { useRestaurant } from "@/contexts/RestaurantContext";
 
 export const TableManagement = () => {
-  const { tables } = useRestaurant();
+  const { tables, addTable } = useRestaurant();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -38,7 +39,7 @@ export const TableManagement = () => {
           <h1 className="text-2xl font-bold text-gray-900">Table Management</h1>
           <p className="text-gray-600">Manage your restaurant tables and their current status.</p>
         </div>
-        <AddTableDialog />
+        <AddTableDialog onAddTable={addTable} />
       </div>
 
       {/* Stats */}

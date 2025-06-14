@@ -1,12 +1,14 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Clock, CheckCircle, ChefHat, Utensils } from "lucide-react";
+import { Search, Clock, CheckCircle, ChefHat, Utensils, Printer } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { NewOrderDialog } from "./NewOrderDialog";
+import { EditOrderDialog } from "./EditOrderDialog";
 import { useRestaurant } from "@/contexts/RestaurantContext";
 
 interface OrderItem {
@@ -30,7 +32,7 @@ interface Order {
 
 export const OrderManagement = () => {
   const { toast } = useToast();
-  const { orders, updateOrderStatus } = useRestaurant();
+  const { orders, updateOrderStatus, printReceipt } = useRestaurant();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all");
   
@@ -59,6 +61,14 @@ export const OrderManagement = () => {
     toast({
       title: "Order Updated",
       description: `Order ${orderId} status changed to ${newStatus}`,
+    });
+  };
+
+  const handlePrintReceipt = (orderId: string) => {
+    printReceipt(orderId);
+    toast({
+      title: "Receipt Printed",
+      description: `Receipt for order ${orderId} has been sent to printer`,
     });
   };
 
@@ -163,7 +173,12 @@ export const OrderManagement = () => {
               <div className="space-y-2">
                 {order.items.map((item) => (
                   <div key={item.id} className="flex justify-between text-sm">
-                    <span>{item.quantity}x {item.name}</span>
+                    <div>
+                      <span>{item.quantity}x {item.name}</span>
+                      {item.notes && (
+                        <p className="text-xs text-orange-600 italic">Note: {item.notes}</p>
+                      )}
+                    </div>
                     <span className="font-medium">${(item.price * item.quantity).toFixed(2)}</span>
                   </div>
                 ))}
@@ -179,7 +194,7 @@ export const OrderManagement = () => {
               </div>
               
               {/* Actions */}
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 {getNextStatus(order.status) && (
                   <Button 
                     size="sm"
@@ -189,8 +204,16 @@ export const OrderManagement = () => {
                     Mark as {getNextStatus(order.status)?.charAt(0).toUpperCase() + getNextStatus(order.status)?.slice(1)}
                   </Button>
                 )}
-                <Button size="sm" variant="outline">
-                  Print KOT
+                
+                <EditOrderDialog order={order} />
+                
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => handlePrintReceipt(order.id)}
+                >
+                  <Printer className="w-4 h-4 mr-1" />
+                  Receipt
                 </Button>
               </div>
               

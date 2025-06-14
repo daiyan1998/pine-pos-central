@@ -29,9 +29,18 @@ interface Table {
   reservationTime?: string;
 }
 
+interface Customer {
+  id: string;
+  name: string;
+  phone?: string;
+  email?: string;
+  orderHistory: string[];
+}
+
 interface RestaurantContextType {
   orders: Order[];
   tables: Table[];
+  customers: Customer[];
   addOrder: (newOrder: { 
     tableNumber: number; 
     orderType: 'dine-in' | 'takeaway' | 'delivery'; 
@@ -41,6 +50,10 @@ interface RestaurantContextType {
   updateOrderStatus: (orderId: string, newStatus: Order['status']) => void;
   addTable: (newTable: { number: number; seats: number }) => void;
   updateTableStatus: (tableId: string, status: Table['status'], orderId?: string) => void;
+  addCustomer: (customer: Omit<Customer, 'id' | 'orderHistory'>) => void;
+  updateOrder: (orderId: string, updates: Partial<Order>) => void;
+  printReceipt: (orderId: string) => void;
+  getTodaysSales: () => { totalRevenue: number; totalOrders: number; };
 }
 
 const RestaurantContext = createContext<RestaurantContextType | undefined>(undefined);
@@ -108,6 +121,11 @@ export const RestaurantProvider = ({ children }: RestaurantProviderProps) => {
     { id: '8', number: 8, seats: 4, status: 'available' },
   ]);
 
+  const [customers, setCustomers] = useState<Customer[]>([
+    { id: '1', name: 'John Doe', phone: '123-456-7890', orderHistory: ['ORD003'] },
+    { id: '2', name: 'Jane Smith', email: 'jane@example.com', orderHistory: [] }
+  ]);
+
   const addOrder = (newOrder: { 
     tableNumber: number; 
     orderType: 'dine-in' | 'takeaway' | 'delivery'; 
@@ -135,6 +153,20 @@ export const RestaurantProvider = ({ children }: RestaurantProviderProps) => {
         table.number === newOrder.tableNumber 
           ? { ...table, status: 'occupied' as const, currentOrder: order.id }
           : table
+      ));
+    }
+
+    // Add customer if not exists
+    if (newOrder.customerName && (newOrder.orderType === 'takeaway' || newOrder.orderType === 'delivery')) {
+      const existingCustomer = customers.find(c => c.name.toLowerCase() === newOrder.customerName!.toLowerCase());
+      if (!existingCustomer) {
+        addCustomer({ name: newOrder.customerName });
+      }
+      // Update customer order history
+      setCustomers(prev => prev.map(customer => 
+        customer.name.toLowerCase() === newOrder.customerName!.toLowerCase()
+          ? { ...customer, orderHistory: [...customer.orderHistory, order.id] }
+          : customer
       ));
     }
   };
@@ -175,13 +207,85 @@ export const RestaurantProvider = ({ children }: RestaurantProviderProps) => {
     ));
   };
 
+  const addCustomer = (customer: Omit<Customer, 'id' | 'orderHistory'>) => {
+    const newCustomer: Customer = {
+      id: `CUST${Date.now()}`,
+      ...customer,
+      orderHistory: []
+    };
+    setCustomers(prev => [...prev, newCustomer]);
+  };
+
+  const updateOrder = (orderId: string, updates: Partial<Order>) => {
+    setOrders(prev => prev.map(order => 
+      order.id === orderId ? { ...order, ...updates } : order
+    ));
+  };
+
+  const printReceipt = (orderId: string) => {
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return;
+
+    const receiptContent = `
+=== POSPine Restaurant ===
+Receipt #${order.id}
+Date: ${order.createdAt}
+${order.orderType === 'dine-in' ? `Table: ${order.tableNumber}` : `Customer: ${order.customerName}`}
+
+Items:
+${order.items.map(item => `${item.quantity}x ${item.name} - $${(item.price * item.quantity).toFixed(2)}`).join('\n')}
+
+Total: $${order.total.toFixed(2)}
+
+Thank you for your visit!
+`;
+
+    // Create a new window for printing
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Receipt #${order.id}</title>
+            <style>
+              body { font-family: monospace; padding: 20px; }
+              pre { white-space: pre-wrap; }
+            </style>
+          </head>
+          <body>
+            <pre>${receiptContent}</pre>
+            <script>window.print(); window.close();</script>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+    }
+  };
+
+  const getTodaysSales = () => {
+    const today = new Date().toDateString();
+    const todaysOrders = orders.filter(order => 
+      order.status === 'served' && new Date(order.createdAt).toDateString() === today
+    );
+    
+    return {
+      totalRevenue: todaysOrders.reduce((sum, order) => sum + order.total, 0),
+      totalOrders: todaysOrders.length
+    };
+  };
+
   const value: RestaurantContextType = {
     orders,
     tables,
+    customers,
     addOrder,
     updateOrderStatus,
     addTable,
     updateTableStatus,
+    addCustomer,
+    updateOrder,
+    printReceipt,
+    getTodaysSales,
   };
 
   return (
