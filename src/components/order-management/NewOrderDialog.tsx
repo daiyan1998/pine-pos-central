@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,7 @@ interface OrderItem {
 }
 
 export const NewOrderDialog = () => {
-  const { addOrder } = useRestaurant();
+  const { addOrder, tables } = useRestaurant();
   const [open, setOpen] = useState(false);
   const [foodDialogOpen, setFoodDialogOpen] = useState(false);
   const [orderType, setOrderType] = useState<'dine-in' | 'takeaway' | 'delivery'>('dine-in');
@@ -94,6 +95,9 @@ export const NewOrderDialog = () => {
     return orderItems.reduce((total, item) => total + (item.price * item.quantity), 0);
   };
 
+  // --- NEW: Available tables logic
+  const availableTables = tables.filter((t) => t.status === "available");
+
   return (
     <>
       <Dialog open={open} onOpenChange={setOpen}>
@@ -125,13 +129,24 @@ export const NewOrderDialog = () => {
             {orderType === 'dine-in' && (
               <div className="space-y-2">
                 <Label htmlFor="tableNumber">Table Number</Label>
-                <Input
-                  id="tableNumber"
-                  type="number"
+                <Select
                   value={tableNumber}
-                  onChange={(e) => setTableNumber(e.target.value)}
-                  placeholder="Enter table number"
-                />
+                  onValueChange={setTableNumber}
+                  disabled={availableTables.length === 0}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={availableTables.length === 0 ? "No tables available" : "Select a table"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableTables.length === 0 ? (
+                      <SelectItem value="" disabled>No tables available</SelectItem>
+                    ) : availableTables.map(table => (
+                      <SelectItem key={table.id} value={String(table.number)}>
+                        Table {table.number} ({table.seats} seats)
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             )}
 
