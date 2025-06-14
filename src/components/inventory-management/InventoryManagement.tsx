@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, AlertTriangle, Package, TrendingDown } from "lucide-react";
+import { Search, AlertTriangle, Package, TrendingDown, Trash2, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AddInventoryItemDialog } from "./AddInventoryItemDialog";
 
@@ -124,6 +124,15 @@ export const InventoryManagement = () => {
   };
 
   const updateStock = (itemId: string, newStock: number) => {
+    if (newStock < 0) {
+      toast({
+        title: "Error",
+        description: "Stock cannot be negative",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setInventory(prev => prev.map(item => 
       item.id === itemId 
         ? { ...item, currentStock: newStock, lastUpdated: new Date().toLocaleString() }
@@ -133,6 +142,17 @@ export const InventoryManagement = () => {
     toast({
       title: "Stock Updated",
       description: `Inventory updated for item ${itemId}`,
+    });
+  };
+
+  const deleteItem = (itemId: string) => {
+    const item = inventory.find(item => item.id === itemId);
+    
+    setInventory(prev => prev.filter(item => item.id !== itemId));
+    
+    toast({
+      title: "Item Deleted",
+      description: `${item?.name} has been removed from inventory`,
     });
   };
 
@@ -309,8 +329,9 @@ export const InventoryManagement = () => {
                     <div className="flex gap-2">
                       <Input
                         type="number"
-                        placeholder="Update"
-                        className="w-20"
+                        placeholder="New stock"
+                        className="w-24"
+                        id={`stock-input-${item.id}`}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
                             const newStock = parseInt((e.target as HTMLInputElement).value);
@@ -321,8 +342,27 @@ export const InventoryManagement = () => {
                           }
                         }}
                       />
-                      <Button size="sm" variant="outline">
-                        Update
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => {
+                          const input = document.getElementById(`stock-input-${item.id}`) as HTMLInputElement;
+                          const newStock = parseInt(input.value);
+                          if (!isNaN(newStock)) {
+                            updateStock(item.id, newStock);
+                            input.value = '';
+                          }
+                        }}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => deleteItem(item.id)}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
