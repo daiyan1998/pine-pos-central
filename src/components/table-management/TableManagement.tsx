@@ -22,7 +22,7 @@ export const TableManagement = () => {
     { id: '4', number: 4, seats: 6, status: 'reserved', reservationTime: '7:30 PM' },
     { id: '5', number: 5, seats: 4, status: 'occupied', currentOrder: '#002' },
     { id: '6', number: 6, seats: 2, status: 'available' },
-    { id: '7', number: 7, seats: 8, seats: 4, status: 'available' },
+    { id: '7', number: 7, seats: 4, status: 'available' },
     { id: '8', number: 8, seats: 4, status: 'occupied', currentOrder: '#003' },
   ]);
 

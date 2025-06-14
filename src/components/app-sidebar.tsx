@@ -1,5 +1,4 @@
 
-import { useState } from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -15,9 +14,7 @@ import {
 import { 
   Calendar, 
   Home, 
-  Users, 
   Settings, 
-  FileText, 
   ShoppingCart, 
   UtensilsCrossed,
   CreditCard,
@@ -77,9 +74,12 @@ const menuItems = [
   },
 ];
 
-export function AppSidebar() {
-  const [activeItem, setActiveItem] = useState("dashboard");
+interface AppSidebarProps {
+  activeItem: string;
+  onItemClick: (itemId: string) => void;
+}
 
+export function AppSidebar({ activeItem, onItemClick }: AppSidebarProps) {
   return (
     <Sidebar className="border-r border-gray-200">
       <SidebarHeader className="p-6 border-b border-gray-200">
@@ -112,7 +112,7 @@ export function AppSidebar() {
                     }`}
                   >
                     <button
-                      onClick={() => setActiveItem(item.id)}
+                      onClick={() => onItemClick(item.id)}
                       className="w-full flex items-center gap-3 px-3 py-2 text-left"
                     >
                       <item.icon className="w-5 h-5" />
