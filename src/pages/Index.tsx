@@ -1,4 +1,3 @@
-
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -14,9 +13,28 @@ import { StaffManagement } from "@/components/staff-management/StaffManagement";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { RestaurantProvider } from "@/contexts/RestaurantContext";
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import UserDashboard from "./UserDashboard";
 
 const Index = () => {
   const [activeView, setActiveView] = useState("dashboard");
+  const { user } = useAuth();
+
+  if (user?.role !== "Admin") {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <header className="w-full px-4 py-3 bg-white border-b border-gray-200 flex items-center justify-between">
+          <h1 className="text-xl font-semibold text-gray-800">POSPine</h1>
+          <span className="text-sm text-gray-600">
+            {user?.name} • {user?.role}
+          </span>
+        </header>
+        <main>
+          <UserDashboard />
+        </main>
+      </div>
+    );
+  }
 
   const renderContent = () => {
     switch (activeView) {
