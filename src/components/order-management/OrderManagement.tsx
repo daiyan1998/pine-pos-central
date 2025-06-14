@@ -71,14 +71,21 @@ export const OrderManagement = () => {
     }
   ]);
 
-  const addOrder = (newOrder: { tableNumber: number; orderType: 'dine-in' | 'takeaway' | 'delivery'; customerName?: string }) => {
+  const addOrder = (newOrder: { 
+    tableNumber: number; 
+    orderType: 'dine-in' | 'takeaway' | 'delivery'; 
+    customerName?: string;
+    items: OrderItem[];
+  }) => {
+    const total = newOrder.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    
     const order: Order = {
       id: `ORD${String(orders.length + 1).padStart(3, '0')}`,
       tableNumber: newOrder.tableNumber,
-      items: [],
+      items: newOrder.items,
       status: 'pending',
       orderType: newOrder.orderType,
-      total: 0,
+      total,
       createdAt: new Date().toLocaleString(),
       customerName: newOrder.customerName
     };
