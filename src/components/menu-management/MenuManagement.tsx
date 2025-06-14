@@ -1,11 +1,11 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Search, Edit, Trash2 } from "lucide-react";
+import { Search, Edit, Trash2 } from "lucide-react";
+import { AddMenuItemDialog } from "./AddMenuItemDialog";
 
 interface MenuItem {
   id: string;
@@ -81,6 +81,18 @@ export const MenuManagement = () => {
     }
   ]);
 
+  const addMenuItem = (newItem: { name: string; category: string; price: number; description: string }) => {
+    const item: MenuItem = {
+      id: `${Date.now()}`,
+      name: newItem.name,
+      category: newItem.category,
+      price: newItem.price,
+      description: newItem.description,
+      available: true
+    };
+    setMenuItems(prev => [...prev, item]);
+  };
+
   const categories = [
     { id: 'all', name: 'All Items', count: menuItems.length },
     { id: 'starters', name: 'Starters', count: menuItems.filter(item => item.category === 'starters').length },
@@ -109,10 +121,7 @@ export const MenuManagement = () => {
           <h1 className="text-2xl font-bold text-gray-900">Menu Management</h1>
           <p className="text-gray-600">Manage your restaurant menu items and categories.</p>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-          <Plus className="w-4 h-4 mr-2" />
-          Add Item
-        </Button>
+        <AddMenuItemDialog onAddItem={addMenuItem} />
       </div>
 
       {/* Search and Filters */}

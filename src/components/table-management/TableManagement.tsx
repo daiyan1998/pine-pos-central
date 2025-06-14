@@ -1,9 +1,9 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Plus, Users, Clock, CheckCircle } from "lucide-react";
+import { CheckCircle, Users, Clock } from "lucide-react";
+import { AddTableDialog } from "./AddTableDialog";
 
 interface Table {
   id: string;
@@ -25,6 +25,16 @@ export const TableManagement = () => {
     { id: '7', number: 7, seats: 4, status: 'available' },
     { id: '8', number: 8, seats: 4, status: 'occupied', currentOrder: '#003' },
   ]);
+
+  const addTable = (newTable: { number: number; seats: number }) => {
+    const table: Table = {
+      id: `${Date.now()}`,
+      number: newTable.number,
+      seats: newTable.seats,
+      status: 'available'
+    };
+    setTables(prev => [...prev, table]);
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -57,10 +67,7 @@ export const TableManagement = () => {
           <h1 className="text-2xl font-bold text-gray-900">Table Management</h1>
           <p className="text-gray-600">Manage your restaurant tables and their current status.</p>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-          <Plus className="w-4 h-4 mr-2" />
-          Add Table
-        </Button>
+        <AddTableDialog onAddTable={addTable} />
       </div>
 
       {/* Stats */}

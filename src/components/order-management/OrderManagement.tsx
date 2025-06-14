@@ -1,13 +1,12 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Search, Clock, CheckCircle, ChefHat, Utensils } from "lucide-react";
+import { Search, Clock, CheckCircle, ChefHat, Utensils } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { NewOrderDialog } from "./NewOrderDialog";
 
 interface OrderItem {
   id: string;
@@ -72,6 +71,20 @@ export const OrderManagement = () => {
     }
   ]);
 
+  const addOrder = (newOrder: { tableNumber: number; orderType: 'dine-in' | 'takeaway' | 'delivery'; customerName?: string }) => {
+    const order: Order = {
+      id: `ORD${String(orders.length + 1).padStart(3, '0')}`,
+      tableNumber: newOrder.tableNumber,
+      items: [],
+      status: 'pending',
+      orderType: newOrder.orderType,
+      total: 0,
+      createdAt: new Date().toLocaleString(),
+      customerName: newOrder.customerName
+    };
+    setOrders(prev => [...prev, order]);
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
@@ -126,10 +139,7 @@ export const OrderManagement = () => {
           <h1 className="text-2xl font-bold text-gray-900">Order Management</h1>
           <p className="text-gray-600">Track and manage all customer orders in real-time.</p>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-          <Plus className="w-4 h-4 mr-2" />
-          New Order
-        </Button>
+        <NewOrderDialog onAddOrder={addOrder} />
       </div>
 
       {/* Filters */}
@@ -210,6 +220,9 @@ export const OrderManagement = () => {
                     <span className="font-medium">${(item.price * item.quantity).toFixed(2)}</span>
                   </div>
                 ))}
+                {order.items.length === 0 && (
+                  <p className="text-sm text-gray-500 italic">No items added yet</p>
+                )}
               </div>
               
               {/* Order Total */}
