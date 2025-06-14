@@ -20,7 +20,8 @@ import {
   CreditCard,
   BarChart3,
   Package,
-  UserCheck
+  UserCheck,
+  ChefHat
 } from "lucide-react";
 
 const menuItems = [
@@ -29,6 +30,12 @@ const menuItems = [
     url: "#dashboard",
     icon: Home,
     id: "dashboard"
+  },
+  {
+    title: "Kitchen Display",
+    url: "#kitchen",
+    icon: ChefHat,
+    id: "kitchen"
   },
   {
     title: "Table Management",

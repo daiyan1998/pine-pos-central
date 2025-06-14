@@ -3,6 +3,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Dashboard } from "@/components/dashboard/Dashboard";
+import { KitchenDisplay } from "@/components/kitchen-display/KitchenDisplay";
 import { TableManagement } from "@/components/table-management/TableManagement";
 import { MenuManagement } from "@/components/menu-management/MenuManagement";
 import { OrderManagement } from "@/components/order-management/OrderManagement";
@@ -20,6 +21,8 @@ const Index = () => {
     switch (activeView) {
       case "dashboard":
         return <Dashboard />;
+      case "kitchen":
+        return <KitchenDisplay />;
       case "tables":
         return <TableManagement />;
       case "menu":
