@@ -62,32 +62,30 @@ const Index = () => {
   };
 
   return (
-    <AuthProvider>
-      <RestaurantProvider>
-        <SidebarProvider>
-          <div className="min-h-screen flex w-full bg-gray-50">
-            <AppSidebar activeItem={activeView} onItemClick={setActiveView} />
-            <main className="flex-1 flex flex-col">
-              <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <SidebarTrigger />
-                  <h1 className="text-xl font-semibold text-gray-800">POSPine Dashboard</h1>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-sm text-gray-600">Welcome, Admin</span>
-                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                    A
-                  </div>
-                </div>
-              </header>
-              <div className="flex-1 p-6">
-                {renderContent()}
+    <RestaurantProvider>
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full bg-gray-50">
+          <AppSidebar activeItem={activeView} onItemClick={setActiveView} />
+          <main className="flex-1 flex flex-col">
+            <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <SidebarTrigger />
+                <h1 className="text-xl font-semibold text-gray-800">POSPine Dashboard</h1>
               </div>
-            </main>
-          </div>
-        </SidebarProvider>
-      </RestaurantProvider>
-    </AuthProvider>
+              <div className="flex items-center gap-4">
+                <span className="text-sm text-gray-600">Welcome, Admin</span>
+                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                  A
+                </div>
+              </div>
+            </header>
+            <div className="flex-1 p-6">
+              {renderContent()}
+            </div>
+          </main>
+        </div>
+      </SidebarProvider>
+    </RestaurantProvider>
   );
 };
 
