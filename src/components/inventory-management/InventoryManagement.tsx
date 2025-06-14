@@ -1,12 +1,12 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Search, AlertTriangle, Package, TrendingDown } from "lucide-react";
+import { Search, AlertTriangle, Package, TrendingDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { AddInventoryItemDialog } from "./AddInventoryItemDialog";
 
 interface InventoryItem {
   id: string;
@@ -98,6 +98,16 @@ export const InventoryManagement = () => {
     { id: 'pantry', name: 'Pantry Items' }
   ];
 
+  const addInventoryItem = (newItem: Omit<InventoryItem, 'id' | 'lastUpdated'>) => {
+    const item: InventoryItem = {
+      ...newItem,
+      id: `INV${String(inventory.length + 1).padStart(3, '0')}`,
+      lastUpdated: new Date().toLocaleString()
+    };
+    
+    setInventory(prev => [...prev, item]);
+  };
+
   const getStockStatus = (item: InventoryItem) => {
     if (item.currentStock <= item.minStock) return 'critical';
     if (item.currentStock <= item.minStock * 1.5) return 'low';
@@ -144,10 +154,7 @@ export const InventoryManagement = () => {
           <h1 className="text-2xl font-bold text-gray-900">Inventory Management</h1>
           <p className="text-gray-600">Track and manage your restaurant's stock levels.</p>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-          <Plus className="w-4 h-4 mr-2" />
-          Add Item
-        </Button>
+        <AddInventoryItemDialog onAddItem={addInventoryItem} />
       </div>
 
       {/* Stats */}
