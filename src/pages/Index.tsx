@@ -5,6 +5,11 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Dashboard } from "@/components/dashboard/Dashboard";
 import { TableManagement } from "@/components/table-management/TableManagement";
 import { MenuManagement } from "@/components/menu-management/MenuManagement";
+import { OrderManagement } from "@/components/order-management/OrderManagement";
+import { BillingPayments } from "@/components/billing-payments/BillingPayments";
+import { SalesReports } from "@/components/sales-reports/SalesReports";
+import { InventoryManagement } from "@/components/inventory-management/InventoryManagement";
+import { StaffManagement } from "@/components/staff-management/StaffManagement";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { useState } from "react";
 
@@ -20,15 +25,15 @@ const Index = () => {
       case "menu":
         return <MenuManagement />;
       case "orders":
-        return <div className="text-center py-12"><h2 className="text-2xl font-bold text-gray-900">Order Management</h2><p className="text-gray-600 mt-2">Coming soon...</p></div>;
+        return <OrderManagement />;
       case "billing":
-        return <div className="text-center py-12"><h2 className="text-2xl font-bold text-gray-900">Billing & Payments</h2><p className="text-gray-600 mt-2">Coming soon...</p></div>;
+        return <BillingPayments />;
       case "reports":
-        return <div className="text-center py-12"><h2 className="text-2xl font-bold text-gray-900">Sales Reports</h2><p className="text-gray-600 mt-2">Coming soon...</p></div>;
+        return <SalesReports />;
       case "inventory":
-        return <div className="text-center py-12"><h2 className="text-2xl font-bold text-gray-900">Inventory Management</h2><p className="text-gray-600 mt-2">Coming soon...</p></div>;
+        return <InventoryManagement />;
       case "staff":
-        return <div className="text-center py-12"><h2 className="text-2xl font-bold text-gray-900">Staff Management</h2><p className="text-gray-600 mt-2">Coming soon...</p></div>;
+        return <StaffManagement />;
       default:
         return <Dashboard />;
     }
