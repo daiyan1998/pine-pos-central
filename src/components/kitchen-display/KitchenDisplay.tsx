@@ -1,12 +1,12 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Clock, ChefHat, CheckCircle, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useRestaurant } from "@/contexts/RestaurantContext";
 
-interface OrderItem {
+interface KitchenOrderItem {
   id: string;
   name: string;
   quantity: number;
@@ -17,79 +17,51 @@ interface OrderItem {
 interface KitchenOrder {
   id: string;
   tableNumber: number;
-  items: OrderItem[];
+  items: KitchenOrderItem[];
   status: 'pending' | 'preparing' | 'ready';
   orderType: 'dine-in' | 'takeaway' | 'delivery';
   orderTime: string;
   customerName?: string;
   priority: 'normal' | 'urgent';
-  waitTime: number; // in minutes
+  waitTime: number;
 }
 
 export const KitchenDisplay = () => {
   const { toast } = useToast();
-  const [orders, setOrders] = useState<KitchenOrder[]>([
-    {
-      id: 'ORD001',
-      tableNumber: 5,
-      items: [
-        { id: '1', name: 'Chicken Burger', quantity: 2, category: 'Main', notes: 'No onions' },
-        { id: '2', name: 'French Fries', quantity: 2, category: 'Sides' }
-      ],
-      status: 'preparing',
-      orderType: 'dine-in',
-      orderTime: '12:30',
-      priority: 'normal',
-      waitTime: 15
-    },
-    {
-      id: 'ORD002',
-      tableNumber: 2,
-      items: [
-        { id: '3', name: 'Caesar Salad', quantity: 1, category: 'Appetizer' },
-        { id: '4', name: 'Margherita Pizza', quantity: 1, category: 'Main', notes: 'Extra cheese' }
-      ],
-      status: 'pending',
-      orderType: 'dine-in',
-      orderTime: '12:35',
-      priority: 'urgent',
-      waitTime: 10
-    },
-    {
-      id: 'ORD003',
-      tableNumber: 0,
-      items: [
-        { id: '5', name: 'Chicken Burger', quantity: 1, category: 'Main' },
-        { id: '6', name: 'Coke', quantity: 1, category: 'Beverages' }
-      ],
-      status: 'ready',
-      orderType: 'takeaway',
-      orderTime: '12:25',
-      customerName: 'John Doe',
-      priority: 'normal',
-      waitTime: 20
-    }
-  ]);
-
+  const { orders, updateOrderStatus } = useRestaurant();
   const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Convert orders to kitchen format
+  const kitchenOrders: KitchenOrder[] = orders
+    .filter(order => order.status !== 'served')
+    .map(order => ({
+      id: order.id,
+      tableNumber: order.tableNumber,
+      items: order.items.map(item => ({
+        id: item.id,
+        name: item.name,
+        quantity: item.quantity,
+        notes: item.notes,
+        category: 'Main' // Default category
+      })),
+      status: order.status as 'pending' | 'preparing' | 'ready',
+      orderType: order.orderType,
+      orderTime: order.createdAt.split(' ')[1] || '00:00',
+      customerName: order.customerName,
+      priority: 'normal' as const,
+      waitTime: Math.floor((new Date().getTime() - new Date(order.createdAt).getTime()) / (1000 * 60))
+    }));
 
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
-      // Update wait times
-      setOrders(prev => prev.map(order => ({
-        ...order,
-        waitTime: Math.floor((new Date().getTime() - new Date(`2025-06-14 ${order.orderTime}`).getTime()) / (1000 * 60))
-      })));
-    }, 60000); // Update every minute
+    }, 60000);
 
     return () => clearInterval(timer);
   }, []);
 
-  const updateOrderStatus = (orderId: string, newStatus: KitchenOrder['status']) => {
-    setOrders(prev => prev.map(order => 
-      order.id === orderId ? { ...order, status: newStatus } : order
-    ));
+  const handleUpdateOrderStatus = (orderId: string, newStatus: 'pending' | 'preparing' | 'ready') => {
+    updateOrderStatus(orderId, newStatus);
     
     const statusMessages = {
       preparing: "started preparing",
@@ -127,8 +99,8 @@ export const KitchenDisplay = () => {
     }
   };
 
-  const filteredOrders = orders.filter(order => order.status !== 'ready');
-  const readyOrders = orders.filter(order => order.status === 'ready');
+  const filteredOrders = kitchenOrders.filter(order => order.status !== 'ready');
+  const readyOrders = kitchenOrders.filter(order => order.status === 'ready');
 
   return (
     <div className="space-y-6 bg-gray-50 min-h-screen p-6">
@@ -164,7 +136,7 @@ export const KitchenDisplay = () => {
               <div>
                 <p className="text-sm text-gray-600">Pending Orders</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {orders.filter(o => o.status === 'pending').length}
+                  {kitchenOrders.filter(o => o.status === 'pending').length}
                 </p>
               </div>
             </div>
@@ -180,7 +152,7 @@ export const KitchenDisplay = () => {
               <div>
                 <p className="text-sm text-gray-600">Preparing</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {orders.filter(o => o.status === 'preparing').length}
+                  {kitchenOrders.filter(o => o.status === 'preparing').length}
                 </p>
               </div>
             </div>
@@ -196,7 +168,7 @@ export const KitchenDisplay = () => {
               <div>
                 <p className="text-sm text-gray-600">Ready</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {orders.filter(o => o.status === 'ready').length}
+                  {kitchenOrders.filter(o => o.status === 'ready').length}
                 </p>
               </div>
             </div>
@@ -263,7 +235,7 @@ export const KitchenDisplay = () => {
                   {order.status === 'pending' && (
                     <Button 
                       size="sm"
-                      onClick={() => updateOrderStatus(order.id, 'preparing')}
+                      onClick={() => handleUpdateOrderStatus(order.id, 'preparing')}
                       className="flex-1 bg-blue-600 hover:bg-blue-700"
                     >
                       Start Preparing
@@ -272,7 +244,7 @@ export const KitchenDisplay = () => {
                   {order.status === 'preparing' && (
                     <Button 
                       size="sm"
-                      onClick={() => updateOrderStatus(order.id, 'ready')}
+                      onClick={() => handleUpdateOrderStatus(order.id, 'ready')}
                       className="flex-1 bg-green-600 hover:bg-green-700"
                     >
                       Mark Ready

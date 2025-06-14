@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, UtensilsCrossed } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { FoodSelectionDialog } from "./FoodSelectionDialog";
+import { useRestaurant } from "@/contexts/RestaurantContext";
 
 interface OrderItem {
   id: string;
@@ -17,16 +17,8 @@ interface OrderItem {
   notes?: string;
 }
 
-interface NewOrderDialogProps {
-  onAddOrder: (order: {
-    tableNumber: number;
-    orderType: 'dine-in' | 'takeaway' | 'delivery';
-    customerName?: string;
-    items: OrderItem[];
-  }) => void;
-}
-
-export const NewOrderDialog = ({ onAddOrder }: NewOrderDialogProps) => {
+export const NewOrderDialog = () => {
+  const { addOrder } = useRestaurant();
   const [open, setOpen] = useState(false);
   const [foodDialogOpen, setFoodDialogOpen] = useState(false);
   const [orderType, setOrderType] = useState<'dine-in' | 'takeaway' | 'delivery'>('dine-in');
@@ -56,7 +48,7 @@ export const NewOrderDialog = ({ onAddOrder }: NewOrderDialogProps) => {
       return;
     }
 
-    onAddOrder({
+    addOrder({
       tableNumber: orderType === 'dine-in' ? parseInt(tableNumber) : 0,
       orderType,
       customerName: orderType !== 'dine-in' ? customerName : undefined,

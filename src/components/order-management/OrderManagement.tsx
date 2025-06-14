@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, Clock, CheckCircle, ChefHat, Utensils } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { NewOrderDialog } from "./NewOrderDialog";
+import { useRestaurant } from "@/contexts/RestaurantContext";
 
 interface OrderItem {
   id: string;
@@ -29,69 +30,10 @@ interface Order {
 
 export const OrderManagement = () => {
   const { toast } = useToast();
+  const { orders, updateOrderStatus } = useRestaurant();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all");
   
-  const [orders, setOrders] = useState<Order[]>([
-    {
-      id: 'ORD001',
-      tableNumber: 5,
-      items: [
-        { id: '1', name: 'Chicken Burger', price: 12.99, quantity: 2 },
-        { id: '2', name: 'Coca Cola', price: 2.99, quantity: 2 }
-      ],
-      status: 'preparing',
-      orderType: 'dine-in',
-      total: 31.96,
-      createdAt: '2025-06-14 12:30',
-    },
-    {
-      id: 'ORD002',
-      tableNumber: 2,
-      items: [
-        { id: '3', name: 'Caesar Salad', price: 8.99, quantity: 1 },
-        { id: '4', name: 'Margherita Pizza', price: 14.99, quantity: 1 }
-      ],
-      status: 'ready',
-      orderType: 'dine-in',
-      total: 23.98,
-      createdAt: '2025-06-14 12:15',
-    },
-    {
-      id: 'ORD003',
-      tableNumber: 0,
-      items: [
-        { id: '5', name: 'Chicken Burger', price: 12.99, quantity: 1 }
-      ],
-      status: 'pending',
-      orderType: 'takeaway',
-      total: 12.99,
-      createdAt: '2025-06-14 12:45',
-      customerName: 'John Doe'
-    }
-  ]);
-
-  const addOrder = (newOrder: { 
-    tableNumber: number; 
-    orderType: 'dine-in' | 'takeaway' | 'delivery'; 
-    customerName?: string;
-    items: OrderItem[];
-  }) => {
-    const total = newOrder.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    
-    const order: Order = {
-      id: `ORD${String(orders.length + 1).padStart(3, '0')}`,
-      tableNumber: newOrder.tableNumber,
-      items: newOrder.items,
-      status: 'pending',
-      orderType: newOrder.orderType,
-      total,
-      createdAt: new Date().toLocaleString(),
-      customerName: newOrder.customerName
-    };
-    setOrders(prev => [...prev, order]);
-  };
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
@@ -112,10 +54,8 @@ export const OrderManagement = () => {
     }
   };
 
-  const updateOrderStatus = (orderId: string, newStatus: Order['status']) => {
-    setOrders(prev => prev.map(order => 
-      order.id === orderId ? { ...order, status: newStatus } : order
-    ));
+  const handleUpdateOrderStatus = (orderId: string, newStatus: any) => {
+    updateOrderStatus(orderId, newStatus);
     toast({
       title: "Order Updated",
       description: `Order ${orderId} status changed to ${newStatus}`,
@@ -129,7 +69,7 @@ export const OrderManagement = () => {
     return matchesSearch && matchesStatus;
   });
 
-  const getNextStatus = (currentStatus: Order['status']): Order['status'] | null => {
+  const getNextStatus = (currentStatus: any) => {
     switch (currentStatus) {
       case 'pending': return 'preparing';
       case 'preparing': return 'ready';
@@ -146,7 +86,7 @@ export const OrderManagement = () => {
           <h1 className="text-2xl font-bold text-gray-900">Order Management</h1>
           <p className="text-gray-600">Track and manage all customer orders in real-time.</p>
         </div>
-        <NewOrderDialog onAddOrder={addOrder} />
+        <NewOrderDialog />
       </div>
 
       {/* Filters */}
@@ -243,7 +183,7 @@ export const OrderManagement = () => {
                 {getNextStatus(order.status) && (
                   <Button 
                     size="sm"
-                    onClick={() => updateOrderStatus(order.id, getNextStatus(order.status)!)}
+                    onClick={() => handleUpdateOrderStatus(order.id, getNextStatus(order.status)!)}
                     className="flex-1"
                   >
                     Mark as {getNextStatus(order.status)?.charAt(0).toUpperCase() + getNextStatus(order.status)?.slice(1)}
