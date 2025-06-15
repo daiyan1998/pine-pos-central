@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +8,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Search, AlertTriangle, Package, TrendingDown, Trash2, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AddInventoryItemDialog } from "./AddInventoryItemDialog";
+import { EditInventoryItemDialog } from "./EditInventoryItemDialog";
 
 interface InventoryItem {
   id: string;
@@ -108,6 +108,14 @@ export const InventoryManagement = () => {
     };
     
     setInventory(prev => [...prev, item]);
+  };
+
+  const editInventoryItem = (itemId: string, updatedItem: Omit<InventoryItem, 'id' | 'lastUpdated'>) => {
+    setInventory(prev => prev.map(item => 
+      item.id === itemId 
+        ? { ...updatedItem, id: itemId, lastUpdated: new Date().toLocaleString() }
+        : item
+    ));
   };
 
   const getStockStatus = (item: InventoryItem) => {
@@ -358,6 +366,11 @@ export const InventoryManagement = () => {
                       >
                         <Edit className="w-4 h-4" />
                       </Button>
+                      
+                      <EditInventoryItemDialog 
+                        item={item}
+                        onEditItem={editInventoryItem}
+                      />
                       
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
