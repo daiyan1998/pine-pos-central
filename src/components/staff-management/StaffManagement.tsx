@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,8 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Plus, Search, User, Clock, Activity } from "lucide-react";
+import { Search, User, Clock, Activity } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { AddStaffDialog } from "./AddStaffDialog";
+import { EditStaffDialog } from "./EditStaffDialog";
 
 interface StaffMember {
   id: string;
@@ -137,6 +138,30 @@ export const StaffManagement = () => {
 
   const roles = ['Admin', 'Manager', 'Cashier', 'Waiter', 'Chef'];
 
+  const addStaff = (newStaff: Omit<StaffMember, 'id' | 'lastActive' | 'joinDate' | 'status'>) => {
+    const staffMember: StaffMember = {
+      ...newStaff,
+      id: `STF${String(staff.length + 1).padStart(3, '0')}`,
+      status: 'active',
+      joinDate: new Date().toISOString().split('T')[0],
+      lastActive: new Date().toLocaleString()
+    };
+    
+    setStaff(prev => [...prev, staffMember]);
+  };
+
+  const editStaff = (staffId: string, updatedStaff: Omit<StaffMember, 'id' | 'lastActive' | 'joinDate' | 'status'>) => {
+    setStaff(prev => prev.map(member => 
+      member.id === staffId 
+        ? { 
+            ...member, 
+            ...updatedStaff, 
+            lastActive: new Date().toLocaleString() 
+          }
+        : member
+    ));
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active': return 'bg-green-100 text-green-800 border-green-200';
@@ -188,10 +213,7 @@ export const StaffManagement = () => {
           <h1 className="text-2xl font-bold text-gray-900">Staff Management</h1>
           <p className="text-gray-600">Manage your restaurant team and track their activities.</p>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-          <Plus className="w-4 h-4 mr-2" />
-          Add Staff
-        </Button>
+        <AddStaffDialog onAddStaff={addStaff} />
       </div>
 
       {/* Stats */}
@@ -372,9 +394,7 @@ export const StaffManagement = () => {
                         Activate
                       </Button>
                     )}
-                    <Button size="sm" variant="outline">
-                      Edit
-                    </Button>
+                    <EditStaffDialog staff={member} onEditStaff={editStaff} />
                   </div>
                 </CardContent>
               </Card>
