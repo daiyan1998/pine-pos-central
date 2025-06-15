@@ -4,8 +4,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Edit, Trash2 } from "lucide-react";
+import { Search, Trash2 } from "lucide-react";
 import { AddMenuItemDialog } from "./AddMenuItemDialog";
+import { EditMenuItemDialog } from "./EditMenuItemDialog";
 
 interface MenuItem {
   id: string;
@@ -93,6 +94,12 @@ export const MenuManagement = () => {
     setMenuItems(prev => [...prev, item]);
   };
 
+  const editMenuItem = (id: string, updatedItem: { name: string; category: string; price: number; description: string }) => {
+    setMenuItems(prev => prev.map(item => 
+      item.id === id ? { ...item, ...updatedItem } : item
+    ));
+  };
+
   const categories = [
     { id: 'all', name: 'All Items', count: menuItems.length },
     { id: 'starters', name: 'Starters', count: menuItems.filter(item => item.category === 'starters').length },
@@ -170,9 +177,7 @@ export const MenuManagement = () => {
                       </Badge>
                     </div>
                     <div className="flex gap-2">
-                      <Button size="sm" variant="outline" className="p-2">
-                        <Edit className="w-4 h-4" />
-                      </Button>
+                      <EditMenuItemDialog item={item} onEditItem={editMenuItem} />
                       <Button size="sm" variant="outline" className="p-2 text-red-600 hover:text-red-700">
                         <Trash2 className="w-4 h-4" />
                       </Button>
