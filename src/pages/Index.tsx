@@ -1,3 +1,4 @@
+
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -39,7 +40,7 @@ const Index = () => {
   const renderContent = () => {
     switch (activeView) {
       case "dashboard":
-        return <Dashboard />;
+        return <Dashboard onNavigate={setActiveView} />;
       case "kitchen":
         return <KitchenDisplay />;
       case "tables":
@@ -57,7 +58,7 @@ const Index = () => {
       case "staff":
         return <StaffManagement />;
       default:
-        return <Dashboard />;
+        return <Dashboard onNavigate={setActiveView} />;
     }
   };
 

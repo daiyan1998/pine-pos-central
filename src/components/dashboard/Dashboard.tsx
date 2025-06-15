@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -12,7 +11,11 @@ import {
   Calendar
 } from "lucide-react";
 
-export const Dashboard = () => {
+interface DashboardProps {
+  onNavigate?: (view: string) => void;
+}
+
+export const Dashboard = ({ onNavigate }: DashboardProps) => {
   const stats = [
     {
       title: "Today's Sales",
@@ -72,6 +75,13 @@ export const Dashboard = () => {
       case 'ready': return <CheckCircle className="w-3 h-3" />;
       case 'served': return <CheckCircle className="w-3 h-3" />;
       default: return <Clock className="w-3 h-3" />;
+    }
+  };
+
+  const handleQuickAction = (action: string) => {
+    console.log(`Quick action clicked: ${action}`);
+    if (onNavigate) {
+      onNavigate(action);
     }
   };
 
@@ -151,7 +161,10 @@ export const Dashboard = () => {
             <CardTitle className="text-lg font-semibold">Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <button className="w-full p-4 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg text-left transition-colors">
+            <button 
+              onClick={() => handleQuickAction('orders')}
+              className="w-full p-4 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg text-left transition-colors"
+            >
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
                   <ShoppingCart className="w-5 h-5 text-white" />
@@ -163,7 +176,10 @@ export const Dashboard = () => {
               </div>
             </button>
             
-            <button className="w-full p-4 bg-green-50 hover:bg-green-100 border border-green-200 rounded-lg text-left transition-colors">
+            <button 
+              onClick={() => handleQuickAction('tables')}
+              className="w-full p-4 bg-green-50 hover:bg-green-100 border border-green-200 rounded-lg text-left transition-colors"
+            >
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
                   <Users className="w-5 h-5 text-white" />
@@ -175,7 +191,10 @@ export const Dashboard = () => {
               </div>
             </button>
             
-            <button className="w-full p-4 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-lg text-left transition-colors">
+            <button 
+              onClick={() => handleQuickAction('reports')}
+              className="w-full p-4 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-lg text-left transition-colors"
+            >
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
                   <TrendingUp className="w-5 h-5 text-white" />
