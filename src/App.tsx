@@ -8,6 +8,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "@/contexts/AuthContext";
+import Login from "./pages/auth.tsx/Login";
+import Register from "./pages/auth.tsx/Register";
 
 const App = () => {
   const [queryClient] = useState(
@@ -32,6 +34,7 @@ const App = () => {
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="*" element={<NotFound />} />
+              <Route path="/login" element={<Login />} />
             </Routes>
           </BrowserRouter>
         </TooltipProvider>
