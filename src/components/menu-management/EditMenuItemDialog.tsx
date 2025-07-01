@@ -1,13 +1,14 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useForm } from "react-hook-form";
 
 interface MenuItem {
   id: string;
@@ -26,25 +27,28 @@ interface EditMenuItemDialogProps {
 
 export const EditMenuItemDialog = ({ item, onEditItem }: EditMenuItemDialogProps) => {
   const [open, setOpen] = useState(false);
-  const [name, setName] = useState(item.name);
-  const [category, setCategory] = useState(item.category);
-  const [price, setPrice] = useState(item.price.toString());
-  const [description, setDescription] = useState(item.description);
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!name.trim() || !category || !price.trim() || !description.trim()) {
-      toast({
-        title: "Error",
-        description: "Please fill in all fields.",
-        variant: "destructive",
-      });
-      return;
-    }
+  const form = useForm({
+    defaultValues: {
+      name: item.name,
+      category: item.category,
+      price: item.price.toString(),
+      description: item.description,
+    },
+  });
 
-    const priceNum = parseFloat(price);
+  useEffect(() => {
+    form.reset({
+      name: item.name,
+      category: item.category,
+      price: item.price.toString(),
+      description: item.description,
+    });
+  }, [item, form]);
+
+  const handleSubmit = (data: any) => {
+    const priceNum = parseFloat(data.price);
     if (isNaN(priceNum) || priceNum <= 0) {
       toast({
         title: "Error",
@@ -55,10 +59,10 @@ export const EditMenuItemDialog = ({ item, onEditItem }: EditMenuItemDialogProps
     }
 
     onEditItem(item.id, {
-      name: name.trim(),
-      category,
+      name: data.name,
+      category: data.category,
       price: priceNum,
-      description: description.trim(),
+      description: data.description,
     });
 
     toast({
@@ -69,20 +73,8 @@ export const EditMenuItemDialog = ({ item, onEditItem }: EditMenuItemDialogProps
     setOpen(false);
   };
 
-  const resetForm = () => {
-    setName(item.name);
-    setCategory(item.category);
-    setPrice(item.price.toString());
-    setDescription(item.description);
-  };
-
   return (
-    <Dialog open={open} onOpenChange={(newOpen) => {
-      setOpen(newOpen);
-      if (!newOpen) {
-        resetForm();
-      }
-    }}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button size="sm" variant="outline" className="p-2">
           <Edit className="w-4 h-4" />
@@ -92,67 +84,94 @@ export const EditMenuItemDialog = ({ item, onEditItem }: EditMenuItemDialogProps
         <DialogHeader>
           <DialogTitle>Edit Menu Item</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="edit-name">Item Name</Label>
-            <Input
-              id="edit-name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter item name"
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Item Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter item name" {...field} required />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="edit-category">Category</Label>
-            <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="starters">Starters</SelectItem>
-                <SelectItem value="main">Main Course</SelectItem>
-                <SelectItem value="beverages">Beverages</SelectItem>
-                <SelectItem value="desserts">Desserts</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="edit-price">Price ($)</Label>
-            <Input
-              id="edit-price"
-              type="number"
-              step="0.01"
-              min="0"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              placeholder="0.00"
+            
+            <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Category</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value} required>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="starters">Starters</SelectItem>
+                      <SelectItem value="main">Main Course</SelectItem>
+                      <SelectItem value="beverages">Beverages</SelectItem>
+                      <SelectItem value="desserts">Desserts</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="edit-description">Description</Label>
-            <Textarea
-              id="edit-description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter item description"
-              rows={3}
+            
+            <FormField
+              control={form.control}
+              name="price"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Price ($)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="0.00"
+                      {...field}
+                      required
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit">Update Item</Button>
-          </div>
-        </form>
+            
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Enter item description"
+                      rows={3}
+                      {...field}
+                      required
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit">Update Item</Button>
+            </div>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
