@@ -10,18 +10,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Eye, EyeOff, UtensilsCrossed } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useLogin } from "@/api/mutations/auth";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-type LoginFormData = z.infer<typeof loginSchema>;
+type LoginFormData = {
+  email: string;
+  password: string;
+};
 
 const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const loginMutation = useLogin()
 
   const {
     register,
@@ -31,9 +37,11 @@ const LoginForm = () => {
     resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit = async (data: LoginFormData) => {
+  const onSubmit = async (data: { email: string; password: string }) => {
     setIsLoading(true);
     setError("");
+
+    loginMutation.mutate(data)
     
     try {
       // Simulate API call

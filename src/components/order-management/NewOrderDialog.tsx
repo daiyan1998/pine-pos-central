@@ -9,6 +9,7 @@ import { Plus, UtensilsCrossed } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { FoodSelectionDialog } from "./FoodSelectionDialog";
 import { useRestaurant } from "@/contexts/RestaurantContext";
+import { useTables } from "@/api/queries/tables";
 
 interface OrderItem {
   id: string;
@@ -28,9 +29,17 @@ export const NewOrderDialog = () => {
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const { toast } = useToast();
 
+  const getTables = useTables()
+
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+    console.log({
+      orderType,
+      tableNumber,
+      customerName,
+      orderItems
+    })
     if (orderType === 'dine-in' && !tableNumber) {
       toast({
         title: "Error",
@@ -96,7 +105,8 @@ export const NewOrderDialog = () => {
   };
 
   // --- NEW: Available tables logic
-  const availableTables = tables.filter((t) => t.status === "available");
+  const availableTables = getTables.data?.data.filter((t) => t.status === "AVAILABLE");
+
 
   return (
     <>
@@ -129,10 +139,12 @@ export const NewOrderDialog = () => {
             {orderType === 'dine-in' && (
               <div className="space-y-2">
                 <Label htmlFor="tableNumber">Table Number</Label>
+                {availableTables?.length === 0 && <p className="text-sm text-muted-foreground">No tables available</p>}
+                {availableTables?.length > 0 && 
                 <Select
                   value={tableNumber}
                   onValueChange={setTableNumber}
-                  disabled={availableTables.length === 0}
+                  disabled={availableTables?.length === 0}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder={availableTables.length === 0 ? "No tables available" : "Select a table"} />
@@ -141,12 +153,13 @@ export const NewOrderDialog = () => {
                     {availableTables.length === 0 ? (
                       <SelectItem value="" disabled>No tables available</SelectItem>
                     ) : availableTables.map(table => (
-                      <SelectItem key={table.id} value={String(table.number)}>
-                        Table {table.number} ({table.seats} seats)
+                      <SelectItem key={table.id} value={String(table.tableNumber)}>
+                        Table {table.tableNumber} ({table.capacity} seats)
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                }
               </div>
             )}
 
