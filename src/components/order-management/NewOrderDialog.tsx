@@ -9,7 +9,8 @@ import { Plus, UtensilsCrossed } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { FoodSelectionDialog } from "./FoodSelectionDialog";
 import { useRestaurant } from "@/contexts/RestaurantContext";
-import { useTables } from "@/api/queries/tables";
+import { useGetTables } from "@/api/queries/tables";
+import { useCreateOrder } from "@/api/mutations/order";
 
 interface OrderItem {
   id: string;
@@ -20,62 +21,60 @@ interface OrderItem {
 }
 
 export const NewOrderDialog = () => {
-  const { addOrder, tables } = useRestaurant();
+  const {  tables } = useRestaurant();
   const [open, setOpen] = useState(false);
   const [foodDialogOpen, setFoodDialogOpen] = useState(false);
-  const [orderType, setOrderType] = useState<'dine-in' | 'takeaway' | 'delivery'>('dine-in');
+  const [orderType, setOrderType] = useState<'DINE_IN' | 'TAKEAWAY' | 'DELIVERY'>('DINE_IN');
   const [tableNumber, setTableNumber] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const { toast } = useToast();
 
-  const getTables = useTables()
+  const getTables = useGetTables()
+  const createOrder = useCreateOrder()
 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log({
-      orderType,
-      tableNumber,
-      customerName,
-      orderItems
-    })
-    if (orderType === 'dine-in' && !tableNumber) {
-      toast({
-        title: "Error",
-        description: "Please select a table number for dine-in orders",
-        variant: "destructive",
-      });
-      return;
-    }
 
-    if ((orderType === 'takeaway' || orderType === 'delivery') && !customerName) {
-      toast({
-        title: "Error",
-        description: "Please enter customer name for takeaway/delivery orders",
-        variant: "destructive",
-      });
-      return;
-    }
+    createOrder.mutate({ orderType, tableNumber, customerName, orderItems })
+    // console.log({
+    //   orderType,
+    //   tableNumber,
+    //   customerName,
+    //   orderItems
+    // })
+    // if (orderType === 'dine-in' && !tableNumber) {
+    //   toast({
+    //     title: "Error",
+    //     description: "Please select a table number for dine-in orders",
+    //     variant: "destructive",
+    //   });
+    //   return;
+    // }
 
-    addOrder({
-      tableNumber: orderType === 'dine-in' ? parseInt(tableNumber) : 0,
-      orderType,
-      customerName: orderType !== 'dine-in' ? customerName : undefined,
-      items: orderItems,
-    });
+    // if ((orderType === 'takeaway' || orderType === 'delivery') && !customerName) {
+    //   toast({
+    //     title: "Error",
+    //     description: "Please enter customer name for takeaway/delivery orders",
+    //     variant: "destructive",
+    //   });
+    //   return;
+    // }
 
-    toast({
-      title: "Success",
-      description: "New order created successfully",
-    });
+  
+
+    // toast({
+    //   title: "Success",
+    //   description: "New order created successfully",
+    // });
 
     resetForm();
     setOpen(false);
   };
 
   const resetForm = () => {
-    setOrderType('dine-in');
+    setOrderType('DINE_IN');
     setTableNumber("");
     setCustomerName("");
     setOrderItems([]);
@@ -124,19 +123,19 @@ export const NewOrderDialog = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="orderType">Order Type</Label>
-              <Select value={orderType} onValueChange={(value: 'dine-in' | 'takeaway' | 'delivery') => setOrderType(value)}>
+              <Select value={orderType} onValueChange={(value: 'DINE_IN' | 'TAKEAWAY' | 'DELIVERY') => setOrderType(value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select order type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="dine-in">Dine In</SelectItem>
-                  <SelectItem value="takeaway">Takeaway</SelectItem>
-                  <SelectItem value="delivery">Delivery</SelectItem>
+                  <SelectItem value="DINE_IN">Dine In</SelectItem>
+                  <SelectItem value="TAKEAWAY">Takeaway</SelectItem>
+                  <SelectItem value="DELIVERY">Delivery</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
-            {orderType === 'dine-in' && (
+            {orderType === 'DINE_IN' && (
               <div className="space-y-2">
                 <Label htmlFor="tableNumber">Table Number</Label>
                 {availableTables?.length === 0 && <p className="text-sm text-muted-foreground">No tables available</p>}
@@ -163,7 +162,6 @@ export const NewOrderDialog = () => {
               </div>
             )}
 
-            {(orderType === 'takeaway' || orderType === 'delivery') && (
               <div className="space-y-2">
                 <Label htmlFor="customerName">Customer Name</Label>
                 <Input
@@ -173,7 +171,6 @@ export const NewOrderDialog = () => {
                   placeholder="Enter customer name"
                 />
               </div>
-            )}
 
             {/* Food Items Section */}
             <div className="space-y-2">

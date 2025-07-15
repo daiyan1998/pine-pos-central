@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Plus, Edit, Trash2, Search, Eye } from 'lucide-react';
 
 const OrderManagement = () => {
+  debugger
   const [orders, setOrders] = useState([
     {
       id: '1',
@@ -40,7 +41,6 @@ const OrderManagement = () => {
       items: 2,
     },
   ]);
-
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
@@ -75,7 +75,7 @@ const OrderManagement = () => {
   };
 
   const updateOrderStatus = (orderId: string, newStatus: string) => {
-    setOrders(orders.map(order => 
+    setOrders(orders?.map(order => 
       order.id === orderId 
         ? { ...order, status: newStatus }
         : order
@@ -151,7 +151,7 @@ const OrderManagement = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredOrders.map((order) => (
+              {filteredOrders?.map((order) => (
                 <TableRow key={order.id}>
                   <TableCell className="font-medium">{order.orderNumber}</TableCell>
                   <TableCell>
