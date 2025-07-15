@@ -1,29 +1,40 @@
-
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus, Minus, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useGetMenuItems } from "@/api/queries/menu";
+import { OrderItem } from "@/types/order.type";
 
 interface MenuItem {
   id: string;
   name: string;
-  category: string;
-  price: number;
-  description: string;
-  available: boolean;
+  description?: string;
+  basePrice: number;
+  categoryId: string;
+  isAvailable: boolean;
+  isActive: boolean;
+  imageUrl?: string;
+  category: {
+    name: string;
+  };
 }
 
-interface OrderItem {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-  notes?: string;
-}
+// interface OrderItem {
+//   id: string;
+//   name: string;
+//   price: number;
+//   quantity: number;
+//   notes?: string;
+// }
 
 interface FoodSelectionDialogProps {
   open: boolean;
@@ -31,62 +42,31 @@ interface FoodSelectionDialogProps {
   onAddItems: (items: OrderItem[]) => void;
 }
 
-export const FoodSelectionDialog = ({ open, onOpenChange, onAddItems }: FoodSelectionDialogProps) => {
+export const FoodSelectionDialog = ({
+  open,
+  onOpenChange,
+  onAddItems,
+}: FoodSelectionDialogProps) => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedItems, setSelectedItems] = useState<{ [key: string]: number }>({});
+  const [selectedItems, setSelectedItems] = useState<{ [key: string]: number }>(
+    {}
+  );
 
-  // Mock menu items - in real app this would come from props or API
-  const menuItems: MenuItem[] = [
-    {
-      id: '1',
-      name: 'Chicken Burger',
-      category: 'main',
-      price: 12.99,
-      description: 'Grilled chicken breast with lettuce, tomato, and special sauce',
-      available: true
-    },
-    {
-      id: '2',
-      name: 'Caesar Salad',
-      category: 'starters',
-      price: 8.99,
-      description: 'Fresh romaine lettuce with caesar dressing and croutons',
-      available: true
-    },
-    {
-      id: '3',
-      name: 'Coca Cola',
-      category: 'beverages',
-      price: 2.99,
-      description: 'Refreshing soft drink',
-      available: true
-    },
-    {
-      id: '4',
-      name: 'Margherita Pizza',
-      category: 'main',
-      price: 14.99,
-      description: 'Fresh mozzarella, tomato sauce, and basil',
-      available: true
-    },
-    {
-      id: '5',
-      name: 'Garlic Bread',
-      category: 'starters',
-      price: 4.99,
-      description: 'Toasted bread with garlic butter and herbs',
-      available: true
-    }
-  ];
+  const getMenuItems = useGetMenuItems();
 
-  const filteredItems = menuItems.filter(item => 
-    item.available && 
-    item.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const menuItems: MenuItem[] = getMenuItems.data?.data || [];
+  console.log(menuItems);
+
+
+  const filteredItems = menuItems.filter(
+    (item) =>
+      item.isActive &&
+      item.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const updateQuantity = (itemId: string, change: number) => {
-    setSelectedItems(prev => {
+    setSelectedItems((prev) => {
       const currentQty = prev[itemId] || 0;
       const newQty = Math.max(0, currentQty + change);
       if (newQty === 0) {
@@ -98,15 +78,17 @@ export const FoodSelectionDialog = ({ open, onOpenChange, onAddItems }: FoodSele
   };
 
   const handleAddToOrder = () => {
-    const orderItems: OrderItem[] = Object.entries(selectedItems).map(([itemId, quantity]) => {
-      const menuItem = menuItems.find(item => item.id === itemId)!;
-      return {
-        id: itemId,
-        name: menuItem.name,
-        price: menuItem.price,
-        quantity
-      };
-    });
+    const orderItems: OrderItem[] = Object.entries(selectedItems).map(
+      ([itemId, quantity]) => {
+        const menuItem = menuItems.find((item) => item.id === itemId)!;
+        return {
+          menuItemId: itemId,
+          name: menuItem.name,
+          price: menuItem.basePrice,
+          quantity,
+        };
+      }
+    );
 
     if (orderItems.length === 0) {
       toast({
@@ -121,7 +103,7 @@ export const FoodSelectionDialog = ({ open, onOpenChange, onAddItems }: FoodSele
     setSelectedItems({});
     setSearchTerm("");
     onOpenChange(false);
-    
+
     toast({
       title: "Items added",
       description: `${orderItems.length} item(s) added to order`,
@@ -130,8 +112,8 @@ export const FoodSelectionDialog = ({ open, onOpenChange, onAddItems }: FoodSele
 
   const getTotalPrice = () => {
     return Object.entries(selectedItems).reduce((total, [itemId, quantity]) => {
-      const item = menuItems.find(item => item.id === itemId);
-      return total + (item ? item.price * quantity : 0);
+      const item = menuItems.find((item) => item.id === itemId);
+      return total + (item ? item.basePrice * quantity : 0);
     }, 0);
   };
 
@@ -141,7 +123,7 @@ export const FoodSelectionDialog = ({ open, onOpenChange, onAddItems }: FoodSele
         <DialogHeader>
           <DialogTitle>Select Food Items</DialogTitle>
         </DialogHeader>
-        
+
         <div className="space-y-4">
           {/* Search */}
           <div className="relative">
@@ -162,15 +144,19 @@ export const FoodSelectionDialog = ({ open, onOpenChange, onAddItems }: FoodSele
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <h3 className="font-medium text-gray-900">{item.name}</h3>
-                      <p className="text-sm text-gray-600">{item.description}</p>
+                      <p className="text-sm text-gray-600">
+                        {item.description}
+                      </p>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="font-bold text-gray-900">${item.price}</span>
+                        <span className="font-bold text-gray-900">
+                          ${item.basePrice}
+                        </span>
                         <Badge variant="secondary" className="text-xs">
-                          {item.category}
+                          {item.category.name}
                         </Badge>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-2">
                       {selectedItems[item.id] > 0 && (
                         <Button
@@ -182,13 +168,13 @@ export const FoodSelectionDialog = ({ open, onOpenChange, onAddItems }: FoodSele
                           <Minus className="w-4 h-4" />
                         </Button>
                       )}
-                      
+
                       {selectedItems[item.id] > 0 && (
                         <span className="w-8 text-center font-medium">
                           {selectedItems[item.id]}
                         </span>
                       )}
-                      
+
                       <Button
                         size="sm"
                         onClick={() => updateQuantity(item.id, 1)}
@@ -207,16 +193,21 @@ export const FoodSelectionDialog = ({ open, onOpenChange, onAddItems }: FoodSele
           {Object.keys(selectedItems).length > 0 && (
             <div className="border-t pt-4">
               <div className="flex justify-between items-center mb-4">
-                <span className="font-medium">Total Items: {Object.values(selectedItems).reduce((a, b) => a + b, 0)}</span>
-                <span className="font-bold text-lg">${getTotalPrice().toFixed(2)}</span>
+                <span className="font-medium">
+                  Total Items:{" "}
+                  {Object.values(selectedItems).reduce((a, b) => a + b, 0)}
+                </span>
+                <span className="font-bold text-lg">
+                  ${getTotalPrice().toFixed(2)}
+                </span>
               </div>
             </div>
           )}
 
           {/* Actions */}
           <div className="flex justify-end gap-2">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => {
                 setSelectedItems({});
                 setSearchTerm("");
@@ -225,9 +216,7 @@ export const FoodSelectionDialog = ({ open, onOpenChange, onAddItems }: FoodSele
             >
               Cancel
             </Button>
-            <Button onClick={handleAddToOrder}>
-              Add to Order
-            </Button>
+            <Button onClick={handleAddToOrder}>Add to Order</Button>
           </div>
         </div>
       </DialogContent>

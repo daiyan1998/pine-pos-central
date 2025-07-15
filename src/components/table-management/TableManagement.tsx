@@ -4,24 +4,33 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Users, Clock } from "lucide-react";
 import { AddTableDialog } from "./AddTableDialog";
 import { useRestaurant } from "@/contexts/RestaurantContext";
+import { useGetTables } from "@/api/queries/tables";
 
 export const TableManagement = () => {
-  const { tables, addTable } = useRestaurant();
+  const { addTable } = useRestaurant();
+
+  const getTables = useGetTables()
+
+  if (getTables.isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  const tables = getTables.data?.data
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'available': return 'bg-green-100 text-green-800 border-green-200';
-      case 'occupied': return 'bg-red-100 text-red-800 border-red-200';
-      case 'reserved': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'AVAILABLE': return 'bg-green-100 text-green-800 border-green-200';
+      case 'OCCUPIED': return 'bg-red-100 text-red-800 border-red-200';
+      case 'RESERVED': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'available': return <CheckCircle className="w-4 h-4" />;
-      case 'occupied': return <Users className="w-4 h-4" />;
-      case 'reserved': return <Clock className="w-4 h-4" />;
+      case 'AVAILABLE': return <CheckCircle className="w-4 h-4" />;
+      case 'OCCUPIED': return <Users className="w-4 h-4" />;
+      case 'RESERVED': return <Clock className="w-4 h-4" />;
       default: return <CheckCircle className="w-4 h-4" />;
     }
   };
@@ -53,7 +62,7 @@ export const TableManagement = () => {
               <div>
                 <p className="text-sm text-gray-600">Available</p>
                 <p className="text-xl font-bold text-gray-900">
-                  {tables.filter(t => t.status === 'available').length}
+                  {tables.filter(t => t.status === 'AVAILABLE').length}
                 </p>
               </div>
             </div>
@@ -69,7 +78,7 @@ export const TableManagement = () => {
               <div>
                 <p className="text-sm text-gray-600">Occupied</p>
                 <p className="text-xl font-bold text-gray-900">
-                  {tables.filter(t => t.status === 'occupied').length}
+                  {tables.filter(t => t.status === 'OCCUPIED').length}
                 </p>
               </div>
             </div>
@@ -85,7 +94,7 @@ export const TableManagement = () => {
               <div>
                 <p className="text-sm text-gray-600">Reserved</p>
                 <p className="text-xl font-bold text-gray-900">
-                  {tables.filter(t => t.status === 'reserved').length}
+                  {tables.filter(t => t.status === 'RESERVED').length}
                 </p>
               </div>
             </div>
@@ -99,8 +108,8 @@ export const TableManagement = () => {
           <Card 
             key={table.id} 
             className={`border-2 cursor-pointer transition-all hover:shadow-md ${
-              table.status === 'available' ? 'border-green-200 hover:border-green-400' :
-              table.status === 'occupied' ? 'border-red-200 hover:border-red-400' :
+              table.status === 'AVAILABLE' ? 'border-green-200 hover:border-green-400' :
+              table.status === 'OCCUPIED' ? 'border-red-200 hover:border-red-400' :
               'border-yellow-200 hover:border-yellow-400'
             }`}
             onClick={() => handleTableClick(table)}
@@ -108,7 +117,7 @@ export const TableManagement = () => {
             <CardContent className="p-4">
               <div className="text-center space-y-3">
                 <div className="flex items-center justify-center w-16 h-16 mx-auto bg-gray-100 rounded-full">
-                  <span className="text-lg font-bold text-gray-700">T{table.number}</span>
+                  <span className="text-lg font-bold text-gray-700">T{table.tableNumber}</span>
                 </div>
                 
                 <div>

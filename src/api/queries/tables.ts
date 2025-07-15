@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { apiClient } from "../client"
 
-export const useTables = () => {
+export const useGetTables = () => {
     return useQuery({
         queryKey: ['tables'],
         queryFn: async () => {

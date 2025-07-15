@@ -11,7 +11,9 @@ export const useLogin = () => {
             const {data} = await authService.login(userData.email, userData.password)
             return data
         },
-        onSuccess: () => {
+        onSuccess: (data) => {
+            const token = data.data?.accessToken
+            localStorage.setItem('authToken', token)
             queryClient.invalidateQueries({queryKey: ['user']})
             navigate('/')
         },
