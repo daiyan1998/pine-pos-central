@@ -95,7 +95,6 @@ export const OrderManagement = () => {
     return matchesSearch && matchesStatus;
   });
 
-  console.log("filteredOrders",filteredOrders)
 
   const getNextStatus = (currentStatus: any) => {
     switch (currentStatus) {

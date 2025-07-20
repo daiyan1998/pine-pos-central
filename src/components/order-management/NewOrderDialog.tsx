@@ -26,6 +26,7 @@ export const NewOrderDialog = () => {
   const [foodDialogOpen, setFoodDialogOpen] = useState(false);
   const [orderType, setOrderType] = useState<'DINE_IN' | 'TAKEAWAY' | 'DELIVERY'>('DINE_IN');
   const [tableNumber, setTableNumber] = useState("");
+  const [tableId,setTableId] = useState("")
   const [customerName, setCustomerName] = useState("");
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const { toast } = useToast();
@@ -37,7 +38,7 @@ export const NewOrderDialog = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    createOrder.mutate({ orderType, tableNumber, customerName, orderItems })
+    createOrder.mutate({ orderType, tableNumber, customerName, orderItems,tableId })
     // console.log({
     //   orderType,
     //   tableNumber,
@@ -142,7 +143,7 @@ export const NewOrderDialog = () => {
                 {availableTables?.length > 0 && 
                 <Select
                   value={tableNumber}
-                  onValueChange={setTableNumber}
+                  onValueChange={setTableId}
                   disabled={availableTables?.length === 0}
                 >
                   <SelectTrigger>
@@ -152,7 +153,7 @@ export const NewOrderDialog = () => {
                     {availableTables.length === 0 ? (
                       <SelectItem value="" disabled>No tables available</SelectItem>
                     ) : availableTables.map(table => (
-                      <SelectItem key={table.id} value={String(table.tableNumber)}>
+                      <SelectItem key={table.id} value={String(table.id)}>
                         Table {table.tableNumber} ({table.capacity} seats)
                       </SelectItem>
                     ))}
