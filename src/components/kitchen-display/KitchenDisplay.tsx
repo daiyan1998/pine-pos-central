@@ -7,22 +7,17 @@ import { useToast } from "@/hooks/use-toast";
 import { useRestaurant } from "@/contexts/RestaurantContext";
 import { useGetOrders } from "@/api/queries/order";
 import { Order } from "@/types/order.type";
-
-interface KitchenOrderItem {
-  id: string;
-  name: string;
-  quantity: number;
-  notes?: string;
-  category: string;
-}
+import { useUpdateMenuItem } from "@/api/mutations/menu";
+import { useUpdateOrderStatus } from "@/api/mutations/order";
 
 
 export const KitchenDisplay = () => {
   const { toast } = useToast();
-  const { updateOrderStatus } = useRestaurant();
   const [currentTime, setCurrentTime] = useState(new Date());
 
   const getOrders = useGetOrders()
+  const updateOrder = useUpdateMenuItem()
+  const { mutate: updateOrderStatus } = useUpdateOrderStatus()
   const orders : Order[] = getOrders.data?.data || []
 
  
@@ -63,7 +58,8 @@ export const KitchenDisplay = () => {
     orderId: string,
     newStatus: "PENDING" | "IN_PREPARATION" | "READY" | "SERVED" | "CANCELLED"
   ) => {
-    // updateOrderStatus(orderId, newStatus);
+    updateOrderStatus({ orderId, status: newStatus });
+
 
     const statusMessages = {
       preparing: "started preparing",

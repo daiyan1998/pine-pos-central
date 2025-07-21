@@ -15,3 +15,17 @@ export const useCreateOrder = () => {
         }
     })
 }
+
+export const useUpdateOrderStatus = () => {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: async (orderData: {orderId: string, status: string}) => {
+            const {data} = await orderService.updateOrderStatus(orderData)
+            return data
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ['orders']})
+        }
+    })
+}

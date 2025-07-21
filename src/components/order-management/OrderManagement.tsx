@@ -23,6 +23,7 @@ import { NewOrderDialog } from "./NewOrderDialog";
 import { EditOrderDialog } from "./EditOrderDialog";
 import { useRestaurant } from "@/contexts/RestaurantContext";
 import { useGetOrders } from "@/api/queries/order";
+import { useUpdateOrderStatus } from "@/api/mutations/order";
 
 interface OrderItem {
   id: string;
@@ -35,10 +36,11 @@ interface OrderItem {
 
 export const OrderManagement = () => {
   const { toast } = useToast();
-  const { updateOrderStatus, printReceipt } = useRestaurant();
+  const {  printReceipt } = useRestaurant();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const getOrders = useGetOrders()
+  const {mutate: updateOrderStatus} = useUpdateOrderStatus()
   const orders = getOrders.data?.data
 
   const getStatusColor = (status: string) => {
@@ -72,7 +74,7 @@ export const OrderManagement = () => {
   };
 
   const handleUpdateOrderStatus = (orderId: string, newStatus: any) => {
-    updateOrderStatus(orderId, newStatus);
+    updateOrderStatus({orderId,status: newStatus});
     toast({
       title: "Order Updated",
       description: `Order ${orderId} status changed to ${newStatus}`,
