@@ -14,7 +14,7 @@ interface AddMenuItemDialogProps {
   onAddItem: (item: {
     name: string;
     category: string;
-    price: number;
+    basePrice: number;
     description: string;
   }) => void;
 }
@@ -27,13 +27,13 @@ export const AddMenuItemDialog = ({ onAddItem }: AddMenuItemDialogProps) => {
     defaultValues: {
       name: "",
       category: "",
-      price: "",
+      basePrice: "",
       description: "",
     },
   });
 
   const handleSubmit = (data: any) => {
-    const priceNum = parseFloat(data.price);
+    const priceNum = parseFloat(data.basePrice);
     if (isNaN(priceNum) || priceNum <= 0) {
       toast({
         title: "Error",
@@ -46,7 +46,7 @@ export const AddMenuItemDialog = ({ onAddItem }: AddMenuItemDialogProps) => {
     onAddItem({
       name: data.name,
       category: data.category,
-      price: priceNum,
+      basePrice: priceNum,
       description: data.description,
     });
 
@@ -113,7 +113,7 @@ export const AddMenuItemDialog = ({ onAddItem }: AddMenuItemDialogProps) => {
             
             <FormField
               control={form.control}
-              name="price"
+              name="basePrice"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Price ($)</FormLabel>

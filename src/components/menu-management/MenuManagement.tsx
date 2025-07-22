@@ -9,7 +9,7 @@ import { AddMenuItemDialog } from "./AddMenuItemDialog";
 import { EditMenuItemDialog } from "./EditMenuItemDialog";
 import { useGetMenuItems } from "@/api/queries/menu";
 import { MenuItem } from "@/types/menu.type";
-import { useUpdateMenuItem } from "@/api/mutations/menu";
+import { useCreateMenuItem, useUpdateMenuItem } from "@/api/mutations/menu";
 
 
 
@@ -20,11 +20,13 @@ export const MenuManagement = () => {
 
   const getMenuItems = useGetMenuItems()
   const updateMenuItem = useUpdateMenuItem()
+  const {mutate: createMenuItem} = useCreateMenuItem()
 
   // const [menuItems, setMenuItems] = useState<MenuItem[]>(getMenuItems.data?.data || [])
   const menuItems: MenuItem[] = getMenuItems.data?.data || []
 
   const addMenuItem = (newItem) => {
+    createMenuItem(newItem)
   };
 
 

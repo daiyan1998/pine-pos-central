@@ -12,6 +12,8 @@ import { Plus, Edit, Trash2, Search, ArrowUp, ArrowDown } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { useGetCategories } from '@/api/queries/category';
+import LoadingScreen from '@/components/shared/LoadingScreen';
 
 const categorySchema = z.object({
   name: z.string().min(1, 'Category name is required'),
@@ -23,35 +25,39 @@ const categorySchema = z.object({
 type CategoryFormData = z.infer<typeof categorySchema>;
 
 const CategoryManagement = () => {
-  const [categories, setCategories] = useState([
-    {
-      id: '1',
-      name: 'Appetizers',
-      description: 'Light starters and appetizers',
-      sortOrder: 1,
-      isActive: true,
-      createdAt: new Date('2024-01-01'),
-      menuItems: 12,
-    },
-    {
-      id: '2',
-      name: 'Main Courses',
-      description: 'Full meals and entrees',
-      sortOrder: 2,
-      isActive: true,
-      createdAt: new Date('2024-01-01'),
-      menuItems: 25,
-    },
-    {
-      id: '3',
-      name: 'Desserts',
-      description: 'Sweet treats and desserts',
-      sortOrder: 3,
-      isActive: true,
-      createdAt: new Date('2024-01-01'),
-      menuItems: 8,
-    },
-  ]);
+  const {data,isLoading} = useGetCategories()
+  console.log(data?.data)
+//  const categories = data?.data
+ const [categories, setCategories] = useState(data?.data)
+  // const [categories, setCategories] = useState([
+  //   {
+  //     id: '1',
+  //     name: 'Appetizers',
+  //     description: 'Light starters and appetizers',
+  //     sortOrder: 1,
+  //     isActive: true,
+  //     createdAt: new Date('2024-01-01'),
+  //     menuItems: 12,
+  //   },
+  //   {
+  //     id: '2',
+  //     name: 'Main Courses',
+  //     description: 'Full meals and entrees',
+  //     sortOrder: 2,
+  //     isActive: true,
+  //     createdAt: new Date('2024-01-01'),
+  //     menuItems: 25,
+  //   },
+  //   {
+  //     id: '3',
+  //     name: 'Desserts',
+  //     description: 'Sweet treats and desserts',
+  //     sortOrder: 3,
+  //     isActive: true,
+  //     createdAt: new Date('2024-01-01'),
+  //     menuItems: 8,
+  //   },
+  // ]);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<any>(null);
@@ -65,10 +71,12 @@ const CategoryManagement = () => {
     }
   });
 
-  const filteredCategories = categories.filter(category =>
+  const filteredCategories = categories?.filter(category =>
     category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (category.description && category.description.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  console.log("filteredCategories",filteredCategories)
 
   const handleEdit = (category: any) => {
     setEditingCategory(category);
@@ -80,7 +88,6 @@ const CategoryManagement = () => {
   };
 
   const handleDelete = (categoryId: string) => {
-    setCategories(categories.filter(category => category.id !== categoryId));
   };
 
   const moveCategoryOrder = (categoryId: string, direction: 'up' | 'down') => {
@@ -99,7 +106,7 @@ const CategoryManagement = () => {
         category.sortOrder = index + 1;
       });
       
-      setCategories(newCategories);
+      // setCategories(newCategories);
     }
   };
 
@@ -126,7 +133,9 @@ const CategoryManagement = () => {
     setEditingCategory(null);
     reset();
   };
-
+  if(isLoading) {
+    return <LoadingScreen/>
+  }
   return (
     <div className="space-y-6">
       <Card>
@@ -211,7 +220,7 @@ const CategoryManagement = () => {
             </TableHeader>
             <TableBody>
               {filteredCategories
-                .sort((a, b) => a.sortOrder - b.sortOrder)
+                ?.sort((a, b) => a.sortOrder - b.sortOrder)
                 .map((category) => (
                 <TableRow key={category.id}>
                   <TableCell>
@@ -245,7 +254,7 @@ const CategoryManagement = () => {
                       {category.isActive ? 'Active' : 'Inactive'}
                     </Badge>
                   </TableCell>
-                  <TableCell>{category.createdAt.toLocaleDateString()}</TableCell>
+                  <TableCell>{category.createdAt?.toLocaleDateString()}</TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-2">
                       <Button

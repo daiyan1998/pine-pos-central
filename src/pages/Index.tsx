@@ -16,6 +16,7 @@ import { RestaurantProvider } from "@/contexts/RestaurantContext";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import UserDashboard from "./UserDashboard";
+import CategoryManagement from "@/components/admin/domains/CategoryManagement";
 
 const Index = () => {
   const [activeView, setActiveView] = useState("dashboard");
@@ -57,6 +58,8 @@ const Index = () => {
         return <InventoryManagement />;
       case "staff":
         return <StaffManagement />;
+      case "category":
+        return <CategoryManagement />;
       default:
         return <Dashboard onNavigate={setActiveView} />;
     }

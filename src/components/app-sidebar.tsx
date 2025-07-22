@@ -67,18 +67,24 @@ const menuItems = [
     icon: BarChart3,
     id: "reports"
   },
+  // {
+  //   title: "Inventory",
+  //   url: "#inventory",
+  //   icon: Package,
+  //   id: "inventory"
+  // },
   {
-    title: "Inventory",
-    url: "#inventory",
+    title: "Category",
+    url: "#category",
     icon: Package,
-    id: "inventory"
+    id: "category"
   },
-  {
-    title: "Staff Management",
-    url: "#staff",
-    icon: UserCheck,
-    id: "staff"
-  },
+  // {
+  //   title: "Staff Management",
+  //   url: "#staff",
+  //   icon: UserCheck,
+  //   id: "staff"
+  // },
 ];
 
 interface AppSidebarProps {
