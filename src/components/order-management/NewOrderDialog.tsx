@@ -29,7 +29,6 @@ export const NewOrderDialog = () => {
   const [tableId,setTableId] = useState("")
   const [customerName, setCustomerName] = useState("");
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
-  const { toast } = useToast();
 
   const getTables = useGetTables()
   const createOrder = useCreateOrder()
@@ -39,36 +38,6 @@ export const NewOrderDialog = () => {
     e.preventDefault();
 
     createOrder.mutate({ orderType, tableNumber, customerName, orderItems,tableId })
-    // console.log({
-    //   orderType,
-    //   tableNumber,
-    //   customerName,
-    //   orderItems
-    // })
-    // if (orderType === 'dine-in' && !tableNumber) {
-    //   toast({
-    //     title: "Error",
-    //     description: "Please select a table number for dine-in orders",
-    //     variant: "destructive",
-    //   });
-    //   return;
-    // }
-
-    // if ((orderType === 'takeaway' || orderType === 'delivery') && !customerName) {
-    //   toast({
-    //     title: "Error",
-    //     description: "Please enter customer name for takeaway/delivery orders",
-    //     variant: "destructive",
-    //   });
-    //   return;
-    // }
-
-  
-
-    // toast({
-    //   title: "Success",
-    //   description: "New order created successfully",
-    // });
 
     resetForm();
     setOpen(false);

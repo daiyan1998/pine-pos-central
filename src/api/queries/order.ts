@@ -10,3 +10,11 @@ export const useGetOrders = () => useQuery({
         return data
     }
 })
+
+export const useGetOrderById = (id: string) => useQuery({
+    queryKey: ['order', id],
+    queryFn: async () => {
+        const {data} = await orderService.getOrderById(id)
+        return data
+    }
+})

@@ -31,3 +31,18 @@ export const useUpdateMenuItem = () => {
         }
     })
 };
+
+export const useDeleteMenuItem = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (id: string) => {
+            const { data } = await menuService.deleteMenuItem(id);
+            return data;
+        }
+        ,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['menu-items'] });
+        }
+    })
+}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,6 +14,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useGetCategories } from '@/api/queries/category';
 import LoadingScreen from '@/components/shared/LoadingScreen';
+import { format } from 'date-fns';
+import { useCreateCategory, useDeleteCategory } from '@/api/mutations/category';
 
 const categorySchema = z.object({
   name: z.string().min(1, 'Category name is required'),
@@ -25,39 +27,16 @@ const categorySchema = z.object({
 type CategoryFormData = z.infer<typeof categorySchema>;
 
 const CategoryManagement = () => {
-  const {data,isLoading} = useGetCategories()
-  console.log(data?.data)
-//  const categories = data?.data
- const [categories, setCategories] = useState(data?.data)
-  // const [categories, setCategories] = useState([
-  //   {
-  //     id: '1',
-  //     name: 'Appetizers',
-  //     description: 'Light starters and appetizers',
-  //     sortOrder: 1,
-  //     isActive: true,
-  //     createdAt: new Date('2024-01-01'),
-  //     menuItems: 12,
-  //   },
-  //   {
-  //     id: '2',
-  //     name: 'Main Courses',
-  //     description: 'Full meals and entrees',
-  //     sortOrder: 2,
-  //     isActive: true,
-  //     createdAt: new Date('2024-01-01'),
-  //     menuItems: 25,
-  //   },
-  //   {
-  //     id: '3',
-  //     name: 'Desserts',
-  //     description: 'Sweet treats and desserts',
-  //     sortOrder: 3,
-  //     isActive: true,
-  //     createdAt: new Date('2024-01-01'),
-  //     menuItems: 8,
-  //   },
-  // ]);
+ const [categories, setCategories] = useState([])
+ const {data,isLoading} = useGetCategories()
+ const {mutate:createCategory} = useCreateCategory()
+ const {mutate:deleteCategory} = useDeleteCategory()
+
+
+ useEffect(() => {
+  setCategories(data?.data)
+ }, [data])
+
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<any>(null);
@@ -79,6 +58,7 @@ const CategoryManagement = () => {
   console.log("filteredCategories",filteredCategories)
 
   const handleEdit = (category: any) => {
+    console.log(category);
     setEditingCategory(category);
     setValue('name', category.name);
     setValue('description', category.description || '');
@@ -88,6 +68,7 @@ const CategoryManagement = () => {
   };
 
   const handleDelete = (categoryId: string) => {
+    deleteCategory(categoryId);   
   };
 
   const moveCategoryOrder = (categoryId: string, direction: 'up' | 'down') => {
@@ -111,24 +92,7 @@ const CategoryManagement = () => {
   };
 
   const onSubmit = (data: CategoryFormData) => {
-    if (editingCategory) {
-      setCategories(categories.map(category => 
-        category.id === editingCategory.id 
-          ? { ...category, ...data, updatedAt: new Date() }
-          : category
-      ));
-    } else {
-      const newCategory = {
-        id: Date.now().toString(),
-        name: data.name,
-        description: data.description || '',
-        sortOrder: data.sortOrder || categories.length + 1,
-        isActive: data.isActive,
-        createdAt: new Date(),
-        menuItems: 0,
-      };
-      setCategories([...categories, newCategory]);
-    }
+    createCategory(data)
     setIsDialogOpen(false);
     setEditingCategory(null);
     reset();
@@ -254,7 +218,7 @@ const CategoryManagement = () => {
                       {category.isActive ? 'Active' : 'Inactive'}
                     </Badge>
                   </TableCell>
-                  <TableCell>{category.createdAt?.toLocaleDateString()}</TableCell>
+                  <TableCell>{format(new Date(category.createdAt), 'dd/MM/yyyy')}</TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-2">
                       <Button

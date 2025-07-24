@@ -22,7 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 import { NewOrderDialog } from "./NewOrderDialog";
 import { EditOrderDialog } from "./EditOrderDialog";
 import { useRestaurant } from "@/contexts/RestaurantContext";
-import { useGetOrders } from "@/api/queries/order";
+import { useGetOrderById, useGetOrders } from "@/api/queries/order";
 import { useUpdateOrderStatus } from "@/api/mutations/order";
 
 interface OrderItem {
@@ -41,6 +41,7 @@ export const OrderManagement = () => {
   const [selectedStatus, setSelectedStatus] = useState("all");
   const getOrders = useGetOrders()
   const {mutate: updateOrderStatus} = useUpdateOrderStatus()
+  // const getOrder = useGetOrderById()
   const orders = getOrders.data?.data
 
   const getStatusColor = (status: string) => {

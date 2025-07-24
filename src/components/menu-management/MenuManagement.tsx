@@ -9,7 +9,7 @@ import { AddMenuItemDialog } from "./AddMenuItemDialog";
 import { EditMenuItemDialog } from "./EditMenuItemDialog";
 import { useGetMenuItems } from "@/api/queries/menu";
 import { MenuItem } from "@/types/menu.type";
-import { useCreateMenuItem, useUpdateMenuItem } from "@/api/mutations/menu";
+import { useCreateMenuItem, useDeleteMenuItem, useUpdateMenuItem } from "@/api/mutations/menu";
 
 
 
@@ -21,6 +21,7 @@ export const MenuManagement = () => {
   const getMenuItems = useGetMenuItems()
   const updateMenuItem = useUpdateMenuItem()
   const {mutate: createMenuItem} = useCreateMenuItem()
+  const {mutate: deleteMenuItem} = useDeleteMenuItem()
 
   // const [menuItems, setMenuItems] = useState<MenuItem[]>(getMenuItems.data?.data || [])
   const menuItems: MenuItem[] = getMenuItems.data?.data || []
@@ -110,7 +111,7 @@ export const MenuManagement = () => {
                     </div>
                     <div className="flex gap-2">
                       {/* <EditMenuItemDialog item={item} onEditItem={editMenuItem} /> */}
-                      <Button size="sm" variant="outline" className="p-2 text-red-600 hover:text-red-700">
+                      <Button onClick={() => deleteMenuItem(item.id)} size="sm" variant="outline" className="p-2 text-red-600 hover:text-red-700">
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>

@@ -9,11 +9,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
+import { useGetCategories } from "@/api/queries/category";
 
 interface AddMenuItemDialogProps {
   onAddItem: (item: {
     name: string;
-    category: string;
+    categoryId: string;
     basePrice: number;
     description: string;
   }) => void;
@@ -22,11 +23,13 @@ interface AddMenuItemDialogProps {
 export const AddMenuItemDialog = ({ onAddItem }: AddMenuItemDialogProps) => {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
+  const {data} = useGetCategories()
+  const categories = data?.data
   
   const form = useForm({
     defaultValues: {
       name: "",
-      category: "",
+      categoryId: "",
       basePrice: "",
       description: "",
     },
@@ -45,7 +48,7 @@ export const AddMenuItemDialog = ({ onAddItem }: AddMenuItemDialogProps) => {
 
     onAddItem({
       name: data.name,
-      category: data.category,
+      categoryId: data.categoryId,
       basePrice: priceNum,
       description: data.description,
     });
@@ -89,7 +92,7 @@ export const AddMenuItemDialog = ({ onAddItem }: AddMenuItemDialogProps) => {
             
             <FormField
               control={form.control}
-              name="category"
+              name="categoryId"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Category</FormLabel>
@@ -100,10 +103,11 @@ export const AddMenuItemDialog = ({ onAddItem }: AddMenuItemDialogProps) => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="starters">Starters</SelectItem>
-                      <SelectItem value="main">Main Course</SelectItem>
-                      <SelectItem value="beverages">Beverages</SelectItem>
-                      <SelectItem value="desserts">Desserts</SelectItem>
+                      {categories?.map((category) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />

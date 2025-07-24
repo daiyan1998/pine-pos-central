@@ -312,7 +312,7 @@ export const KitchenDisplay = () => {
                 <CardContent className="p-4">
                   <div className="text-center">
                     <h3 className="font-bold text-lg text-green-800">
-                      {order.id}
+                      {order.orderNumber}
                     </h3>
                     <p className="text-sm text-green-600">
                       {order.orderType === "DINE_IN"
