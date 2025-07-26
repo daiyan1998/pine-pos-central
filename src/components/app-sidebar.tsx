@@ -21,7 +21,8 @@ import {
   BarChart3,
   Package,
   UserCheck,
-  ChefHat
+  ChefHat,
+  LogOut
 } from "lucide-react";
 
 const menuItems = [
@@ -93,6 +94,7 @@ interface AppSidebarProps {
 }
 
 export function AppSidebar({ activeItem, onItemClick }: AppSidebarProps) {
+  
   return (
     <Sidebar className="border-r border-gray-200">
       <SidebarHeader className="p-6 border-b border-gray-200">
@@ -140,9 +142,11 @@ export function AppSidebar({ activeItem, onItemClick }: AppSidebarProps) {
       </SidebarContent>
       
       <SidebarFooter className="p-4 border-t border-gray-200">
-        <div className="flex items-center gap-3 text-sm text-gray-600">
-          <Settings className="w-4 h-4" />
-          <span>Settings</span>
+        <div className="space-y-2">
+          <div className="flex items-center gap-3 text-sm text-gray-600">
+            <Settings className="w-4 h-4" />
+            <span>Settings</span>
+          </div>
         </div>
       </SidebarFooter>
     </Sidebar>
