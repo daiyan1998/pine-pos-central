@@ -22,7 +22,8 @@ import { useToast } from "@/hooks/use-toast";
 import { NewOrderDialog } from "./NewOrderDialog";
 import { EditOrderDialog } from "./EditOrderDialog";
 import { useRestaurant } from "@/contexts/RestaurantContext";
-import { useGetOrders } from "@/api/queries/order";
+import { useGetOrderById, useGetOrders } from "@/api/queries/order";
+import { useUpdateOrderStatus } from "@/api/mutations/order";
 
 interface OrderItem {
   id: string;
@@ -32,24 +33,15 @@ interface OrderItem {
   notes?: string;
 }
 
-interface Order {
-  id: string;
-  tableNumber: number;
-  items: OrderItem[];
-  status: "pending" | "IN_PREPARATION" | "READY" | "SERVED";
-  orderType: "dine-in" | "takeaway" | "delivery";
-  total: number;
-  createdAt: string;
-  customerName?: string;
-}
 
 export const OrderManagement = () => {
   const { toast } = useToast();
-  const { updateOrderStatus, printReceipt } = useRestaurant();
+  const {  printReceipt } = useRestaurant();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const getOrders = useGetOrders()
-  console.log('orders',getOrders.data)
+  const {mutate: updateOrderStatus} = useUpdateOrderStatus()
+  // const getOrder = useGetOrderById()
   const orders = getOrders.data?.data
 
   const getStatusColor = (status: string) => {
@@ -83,7 +75,7 @@ export const OrderManagement = () => {
   };
 
   const handleUpdateOrderStatus = (orderId: string, newStatus: any) => {
-    updateOrderStatus(orderId, newStatus);
+    updateOrderStatus({orderId,status: newStatus});
     toast({
       title: "Order Updated",
       description: `Order ${orderId} status changed to ${newStatus}`,
@@ -106,7 +98,6 @@ export const OrderManagement = () => {
     return matchesSearch && matchesStatus;
   });
 
-  console.log("filteredOrders",filteredOrders)
 
   const getNextStatus = (currentStatus: any) => {
     switch (currentStatus) {

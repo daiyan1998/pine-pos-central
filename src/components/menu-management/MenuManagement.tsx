@@ -7,98 +7,30 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Trash2 } from "lucide-react";
 import { AddMenuItemDialog } from "./AddMenuItemDialog";
 import { EditMenuItemDialog } from "./EditMenuItemDialog";
+import { useGetMenuItems } from "@/api/queries/menu";
+import { MenuItem } from "@/types/menu.type";
+import { useCreateMenuItem, useDeleteMenuItem, useUpdateMenuItem } from "@/api/mutations/menu";
 
-interface MenuItem {
-  id: string;
-  name: string;
-  category: string;
-  price: number;
-  description: string;
-  available: boolean;
-  variants?: { name: string; price: number }[];
-}
+
 
 export const MenuManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   
-  const [menuItems, setMenuItems] = useState<MenuItem[]>([
-    {
-      id: '1',
-      name: 'Chicken Burger',
-      category: 'main',
-      price: 12.99,
-      description: 'Grilled chicken breast with lettuce, tomato, and special sauce',
-      available: true,
-      variants: [
-        { name: 'Regular', price: 12.99 },
-        { name: 'Large', price: 15.99 }
-      ]
-    },
-    {
-      id: '2',
-      name: 'Caesar Salad',
-      category: 'starters',
-      price: 8.99,
-      description: 'Fresh romaine lettuce with caesar dressing and croutons',
-      available: true
-    },
-    {
-      id: '3',
-      name: 'Coca Cola',
-      category: 'beverages',
-      price: 2.99,
-      description: 'Refreshing soft drink',
-      available: true,
-      variants: [
-        { name: 'Small', price: 2.99 },
-        { name: 'Medium', price: 3.99 },
-        { name: 'Large', price: 4.99 }
-      ]
-    },
-    {
-      id: '4',
-      name: 'Chocolate Cake',
-      category: 'desserts',
-      price: 6.99,
-      description: 'Rich chocolate cake with cream frosting',
-      available: false
-    },
-    {
-      id: '5',
-      name: 'Margherita Pizza',
-      category: 'main',
-      price: 14.99,
-      description: 'Fresh mozzarella, tomato sauce, and basil',
-      available: true
-    },
-    {
-      id: '6',
-      name: 'Garlic Bread',
-      category: 'starters',
-      price: 4.99,
-      description: 'Toasted bread with garlic butter and herbs',
-      available: true
-    }
-  ]);
 
-  const addMenuItem = (newItem: { name: string; category: string; price: number; description: string }) => {
-    const item: MenuItem = {
-      id: `${Date.now()}`,
-      name: newItem.name,
-      category: newItem.category,
-      price: newItem.price,
-      description: newItem.description,
-      available: true
-    };
-    setMenuItems(prev => [...prev, item]);
+  const getMenuItems = useGetMenuItems()
+  const updateMenuItem = useUpdateMenuItem()
+  const {mutate: createMenuItem} = useCreateMenuItem()
+  const {mutate: deleteMenuItem} = useDeleteMenuItem()
+
+  // const [menuItems, setMenuItems] = useState<MenuItem[]>(getMenuItems.data?.data || [])
+  const menuItems: MenuItem[] = getMenuItems.data?.data || []
+
+  const addMenuItem = (newItem) => {
+    createMenuItem(newItem)
   };
 
-  const editMenuItem = (id: string, updatedItem: { name: string; category: string; price: number; description: string }) => {
-    setMenuItems(prev => prev.map(item => 
-      item.id === id ? { ...item, ...updatedItem } : item
-    ));
-  };
+
 
   const categories = [
     { id: 'all', name: 'All Items', count: menuItems.length },
@@ -115,9 +47,10 @@ export const MenuManagement = () => {
   });
 
   const toggleAvailability = (id: string) => {
-    setMenuItems(prev => prev.map(item => 
-      item.id === id ? { ...item, available: !item.available } : item
-    ));
+    updateMenuItem.mutate({
+      id,
+      isActive: !menuItems.find(item => item.id === id)?.isActive
+    })
   };
 
   return (
@@ -170,15 +103,15 @@ export const MenuManagement = () => {
                         {item.name}
                       </CardTitle>
                       <Badge 
-                        variant={item.available ? "default" : "secondary"}
-                        className={`mt-1 ${item.available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
+                        variant={item.isActive ? "default" : "secondary"}
+                        className={`mt-1 ${item.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
                       >
-                        {item.available ? 'Available' : 'Unavailable'}
+                        {item.isActive ? 'Available' : 'Unavailable'}
                       </Badge>
                     </div>
                     <div className="flex gap-2">
-                      <EditMenuItemDialog item={item} onEditItem={editMenuItem} />
-                      <Button size="sm" variant="outline" className="p-2 text-red-600 hover:text-red-700">
+                      {/* <EditMenuItemDialog item={item} onEditItem={editMenuItem} /> */}
+                      <Button onClick={() => deleteMenuItem(item.id)} size="sm" variant="outline" className="p-2 text-red-600 hover:text-red-700">
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
@@ -188,14 +121,14 @@ export const MenuManagement = () => {
                   <p className="text-sm text-gray-600">{item.description}</p>
                   
                   <div className="flex items-center justify-between">
-                    <span className="text-lg font-bold text-gray-900">${item.price}</span>
+                    <span className="text-lg font-bold text-gray-900">${item.basePrice}</span>
                     <Button
                       size="sm"
-                      variant={item.available ? "outline" : "default"}
+                      variant={item.isActive ? "outline" : "default"}
                       onClick={() => toggleAvailability(item.id)}
-                      className={item.available ? "" : "bg-green-600 hover:bg-green-700 text-white"}
+                      className={item.isActive ? "" : "bg-green-600 hover:bg-green-700 text-white"}
                     >
-                      {item.available ? 'Disable' : 'Enable'}
+                      {item.isActive ? 'Disable' : 'Enable'}
                     </Button>
                   </div>
                   
@@ -206,7 +139,7 @@ export const MenuManagement = () => {
                         {item.variants.map((variant, index) => (
                           <div key={index} className="flex justify-between text-sm">
                             <span className="text-gray-600">{variant.name}</span>
-                            <span className="font-medium">${variant.price}</span>
+                            <span className="font-medium">${variant.priceAdd}</span>
                           </div>
                         ))}
                       </div>

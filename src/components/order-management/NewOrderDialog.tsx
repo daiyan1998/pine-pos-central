@@ -26,9 +26,9 @@ export const NewOrderDialog = () => {
   const [foodDialogOpen, setFoodDialogOpen] = useState(false);
   const [orderType, setOrderType] = useState<'DINE_IN' | 'TAKEAWAY' | 'DELIVERY'>('DINE_IN');
   const [tableNumber, setTableNumber] = useState("");
+  const [tableId,setTableId] = useState("")
   const [customerName, setCustomerName] = useState("");
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
-  const { toast } = useToast();
 
   const getTables = useGetTables()
   const createOrder = useCreateOrder()
@@ -37,37 +37,7 @@ export const NewOrderDialog = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    createOrder.mutate({ orderType, tableNumber, customerName, orderItems })
-    // console.log({
-    //   orderType,
-    //   tableNumber,
-    //   customerName,
-    //   orderItems
-    // })
-    // if (orderType === 'dine-in' && !tableNumber) {
-    //   toast({
-    //     title: "Error",
-    //     description: "Please select a table number for dine-in orders",
-    //     variant: "destructive",
-    //   });
-    //   return;
-    // }
-
-    // if ((orderType === 'takeaway' || orderType === 'delivery') && !customerName) {
-    //   toast({
-    //     title: "Error",
-    //     description: "Please enter customer name for takeaway/delivery orders",
-    //     variant: "destructive",
-    //   });
-    //   return;
-    // }
-
-  
-
-    // toast({
-    //   title: "Success",
-    //   description: "New order created successfully",
-    // });
+    createOrder.mutate({ orderType, tableNumber, customerName, orderItems,tableId })
 
     resetForm();
     setOpen(false);
@@ -142,7 +112,7 @@ export const NewOrderDialog = () => {
                 {availableTables?.length > 0 && 
                 <Select
                   value={tableNumber}
-                  onValueChange={setTableNumber}
+                  onValueChange={setTableId}
                   disabled={availableTables?.length === 0}
                 >
                   <SelectTrigger>
@@ -152,7 +122,7 @@ export const NewOrderDialog = () => {
                     {availableTables.length === 0 ? (
                       <SelectItem value="" disabled>No tables available</SelectItem>
                     ) : availableTables.map(table => (
-                      <SelectItem key={table.id} value={String(table.tableNumber)}>
+                      <SelectItem key={table.id} value={String(table.id)}>
                         Table {table.tableNumber} ({table.capacity} seats)
                       </SelectItem>
                     ))}

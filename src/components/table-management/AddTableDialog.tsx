@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useCreateTable } from "@/api/mutations/tables";
 
 interface AddTableDialogProps {
   onAddTable: (table: { number: number; seats: number }) => void;
@@ -14,13 +15,15 @@ interface AddTableDialogProps {
 export const AddTableDialog = ({ onAddTable }: AddTableDialogProps) => {
   const [open, setOpen] = useState(false);
   const [tableNumber, setTableNumber] = useState("");
-  const [seats, setSeats] = useState("");
+  const [capacity, setCapacity] = useState("");
   const { toast } = useToast();
+
+  const createtable = useCreateTable();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!tableNumber || !seats) {
+    if (!tableNumber || !capacity) {
       toast({
         title: "Error",
         description: "Please fill in all fields",
@@ -29,18 +32,15 @@ export const AddTableDialog = ({ onAddTable }: AddTableDialogProps) => {
       return;
     }
 
-    onAddTable({
-      number: parseInt(tableNumber),
-      seats: parseInt(seats),
+    createtable.mutate({
+      tableNumber :tableNumber,
+      capacity: parseInt(capacity),
+      location: "Main Floor"
     });
 
-    toast({
-      title: "Success",
-      description: `Table ${tableNumber} added successfully`,
-    });
 
     setTableNumber("");
-    setSeats("");
+    setCapacity("");
     setOpen(false);
   };
 
@@ -72,8 +72,8 @@ export const AddTableDialog = ({ onAddTable }: AddTableDialogProps) => {
             <Input
               id="seats"
               type="number"
-              value={seats}
-              onChange={(e) => setSeats(e.target.value)}
+              value={capacity}
+              onChange={(e) => setCapacity(e.target.value)}
               placeholder="Enter number of seats"
             />
           </div>

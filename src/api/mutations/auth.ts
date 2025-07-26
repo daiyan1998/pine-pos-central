@@ -36,3 +36,20 @@ export const useRegister = () => {
         }
     })
 }
+
+export const useLogout = () => {
+    const queryClient = useQueryClient()
+    const navigate = useNavigate()
+
+    return useMutation({
+        mutationFn: async () => {
+            const {data} = await authService.logout()
+            return data
+        },
+        onSuccess: () => {
+            localStorage.removeItem('authToken')
+            queryClient.invalidateQueries({queryKey: ['user']})
+            navigate('/login')
+        }
+    })
+}

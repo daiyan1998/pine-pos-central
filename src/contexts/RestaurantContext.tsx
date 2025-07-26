@@ -1,3 +1,4 @@
+import { useGetOrderById } from "@/api/queries/order";
 import { Order, OrderItem, OrderType, OrderStatus, OrderItemStatus } from "@/types/order.type";
 import { Table, TableStatus } from "@/types/table.type";
 import React, { createContext, useContext, useState, ReactNode } from "react";
@@ -271,9 +272,7 @@ export const RestaurantProvider = ({ children }: RestaurantProviderProps) => {
     );
   };
 
-  const printReceipt = (orderId: string) => {
-    const order = orders.find((o) => o.id === orderId);
-    if (!order) return;
+  const printReceipt = (order: any) => {
     const receiptContent = `
 === POSPine Restaurant ===
 Receipt #${order.orderNumber}
