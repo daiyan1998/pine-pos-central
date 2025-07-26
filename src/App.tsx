@@ -10,8 +10,10 @@ import NotFound from "./pages/NotFound";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Login from "./pages/auth.tsx/Login";
 import Register from "./pages/auth.tsx/Register";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 const App = () => {
+  
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -32,9 +34,17 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="*" element={<NotFound />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route 
+                path="/" 
+                element={
+                  <ProtectedRoute>
+                    <Index />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
         </TooltipProvider>

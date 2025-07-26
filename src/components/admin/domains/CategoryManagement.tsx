@@ -31,6 +31,7 @@ const CategoryManagement = () => {
  const {data,isLoading} = useGetCategories()
  const {mutate:createCategory} = useCreateCategory()
  const {mutate:deleteCategory} = useDeleteCategory()
+ const {} = useEdit
 
 
  useEffect(() => {
@@ -58,7 +59,6 @@ const CategoryManagement = () => {
   console.log("filteredCategories",filteredCategories)
 
   const handleEdit = (category: any) => {
-    console.log(category);
     setEditingCategory(category);
     setValue('name', category.name);
     setValue('description', category.description || '');
@@ -92,6 +92,9 @@ const CategoryManagement = () => {
   };
 
   const onSubmit = (data: CategoryFormData) => {
+    if(editingCategory && editingCategory.id) {
+      
+    }
     createCategory(data)
     setIsDialogOpen(false);
     setEditingCategory(null);

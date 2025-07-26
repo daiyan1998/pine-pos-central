@@ -17,19 +17,32 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import UserDashboard from "./UserDashboard";
 import CategoryManagement from "@/components/admin/domains/CategoryManagement";
+import { LogOut } from "lucide-react";
+import { useLogout } from "@/api/mutations/auth";
 
 const Index = () => {
   const [activeView, setActiveView] = useState("dashboard");
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+
+  const {mutate: logoutMutation} = useLogout()
 
   if (user?.role !== "Admin") {
     return (
       <div className="min-h-screen bg-gray-50">
         <header className="w-full px-4 py-3 bg-white border-b border-gray-200 flex items-center justify-between">
           <h1 className="text-xl font-semibold text-gray-800">POSPine</h1>
-          <span className="text-sm text-gray-600">
-            {user?.name} • {user?.role}
-          </span>
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-gray-600">
+              {user?.name} • {user?.role}
+            </span>
+            <button
+              onClick={logout}
+              className="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 px-3 py-1 rounded-lg transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Logout</span>
+            </button>
+          </div>
         </header>
         <main>
           <UserDashboard />
@@ -81,6 +94,13 @@ const Index = () => {
                 <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
                   A
                 </div>
+                <button
+                  onClick={() => logoutMutation()}
+                  className="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 px-3 py-1 rounded-lg transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Logout</span>
+                </button>
               </div>
             </header>
             <div className="flex-1 p-6">
