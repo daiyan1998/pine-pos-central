@@ -9,13 +9,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
-import { useGetCategories } from "@/api/queries/category";
 
 interface AddMenuItemDialogProps {
   onAddItem: (item: {
     name: string;
-    categoryId: string;
-    basePrice: number;
+    category: string;
+    price: number;
     description: string;
   }) => void;
 }
@@ -23,20 +22,18 @@ interface AddMenuItemDialogProps {
 export const AddMenuItemDialog = ({ onAddItem }: AddMenuItemDialogProps) => {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
-  const {data} = useGetCategories()
-  const categories = data?.data
   
   const form = useForm({
     defaultValues: {
       name: "",
-      categoryId: "",
-      basePrice: "",
+      category: "",
+      price: "",
       description: "",
     },
   });
 
   const handleSubmit = (data: any) => {
-    const priceNum = parseFloat(data.basePrice);
+    const priceNum = parseFloat(data.price);
     if (isNaN(priceNum) || priceNum <= 0) {
       toast({
         title: "Error",
@@ -48,8 +45,8 @@ export const AddMenuItemDialog = ({ onAddItem }: AddMenuItemDialogProps) => {
 
     onAddItem({
       name: data.name,
-      categoryId: data.categoryId,
-      basePrice: priceNum,
+      category: data.category,
+      price: priceNum,
       description: data.description,
     });
 
@@ -92,7 +89,7 @@ export const AddMenuItemDialog = ({ onAddItem }: AddMenuItemDialogProps) => {
             
             <FormField
               control={form.control}
-              name="categoryId"
+              name="category"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Category</FormLabel>
@@ -103,11 +100,10 @@ export const AddMenuItemDialog = ({ onAddItem }: AddMenuItemDialogProps) => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {categories?.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
+                      <SelectItem value="starters">Starters</SelectItem>
+                      <SelectItem value="main">Main Course</SelectItem>
+                      <SelectItem value="beverages">Beverages</SelectItem>
+                      <SelectItem value="desserts">Desserts</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -117,7 +113,7 @@ export const AddMenuItemDialog = ({ onAddItem }: AddMenuItemDialogProps) => {
             
             <FormField
               control={form.control}
-              name="basePrice"
+              name="price"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Price ($)</FormLabel>

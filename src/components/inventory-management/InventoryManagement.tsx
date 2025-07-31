@@ -9,10 +9,8 @@ import { Search, AlertTriangle, Package, TrendingDown, Trash2, Edit } from "luci
 import { useToast } from "@/hooks/use-toast";
 import { AddInventoryItemDialog } from "./AddInventoryItemDialog";
 import { EditInventoryItemDialog } from "./EditInventoryItemDialog";
-import { InventoryItem as SchemaInventoryItem, MenuItem, InventoryFormData } from "./types";
 
-// Legacy interface for existing mock data
-interface LegacyInventoryItem {
+interface InventoryItem {
   id: string;
   name: string;
   category: string;
@@ -30,41 +28,7 @@ export const InventoryManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   
-  // Mock menu items aligned with Prisma schema
-  const mockMenuItems: MenuItem[] = [
-    {
-      id: "menu-001",
-      name: "Chicken Breast",
-      categoryId: "cat-001",
-      category: { id: "cat-001", name: "Meat & Poultry" }
-    },
-    {
-      id: "menu-002", 
-      name: "Tomatoes",
-      categoryId: "cat-002",
-      category: { id: "cat-002", name: "Vegetables" }
-    },
-    {
-      id: "menu-003",
-      name: "Milk",
-      categoryId: "cat-003", 
-      category: { id: "cat-003", name: "Dairy Products" }
-    },
-    {
-      id: "menu-004",
-      name: "Orange Juice",
-      categoryId: "cat-004",
-      category: { id: "cat-004", name: "Beverages" }
-    },
-    {
-      id: "menu-005",
-      name: "Rice",
-      categoryId: "cat-005",
-      category: { id: "cat-005", name: "Pantry Items" }
-    }
-  ];
-  
-  const [inventory, setInventory] = useState<LegacyInventoryItem[]>([
+  const [inventory, setInventory] = useState<InventoryItem[]>([
     {
       id: 'INV001',
       name: 'Chicken Breast',
@@ -136,27 +100,17 @@ export const InventoryManagement = () => {
     { id: 'pantry', name: 'Pantry Items' }
   ];
 
-  const addInventoryItem = (formData: InventoryFormData) => {
-    const menuItem = mockMenuItems.find(item => item.id === formData.menuItemId);
-    if (!menuItem) return;
-    
-    const item: LegacyInventoryItem = {
+  const addInventoryItem = (newItem: Omit<InventoryItem, 'id' | 'lastUpdated'>) => {
+    const item: InventoryItem = {
+      ...newItem,
       id: `INV${String(inventory.length + 1).padStart(3, '0')}`,
-      name: menuItem.name,
-      category: menuItem.category.name.toLowerCase().replace(/\s+/g, ''),
-      currentStock: formData.currentStock,
-      minStock: formData.minStock,
-      maxStock: formData.maxStock || 0,
-      unit: formData.unit,
-      costPerUnit: 0, // Will be managed separately in future
-      supplier: 'Default Supplier', // Will be managed separately
       lastUpdated: new Date().toLocaleString()
     };
     
     setInventory(prev => [...prev, item]);
   };
 
-  const editInventoryItem = (itemId: string, updatedItem: Omit<LegacyInventoryItem, 'id' | 'lastUpdated'>) => {
+  const editInventoryItem = (itemId: string, updatedItem: Omit<InventoryItem, 'id' | 'lastUpdated'>) => {
     setInventory(prev => prev.map(item => 
       item.id === itemId 
         ? { ...updatedItem, id: itemId, lastUpdated: new Date().toLocaleString() }
@@ -164,7 +118,7 @@ export const InventoryManagement = () => {
     ));
   };
 
-  const getStockStatus = (item: LegacyInventoryItem) => {
+  const getStockStatus = (item: InventoryItem) => {
     if (item.currentStock <= item.minStock) return 'critical';
     if (item.currentStock <= item.minStock * 1.5) return 'low';
     return 'good';
@@ -230,7 +184,7 @@ export const InventoryManagement = () => {
           <h1 className="text-2xl font-bold text-gray-900">Inventory Management</h1>
           <p className="text-gray-600">Track and manage your restaurant's stock levels.</p>
         </div>
-        <AddInventoryItemDialog onAddItem={addInventoryItem} menuItems={mockMenuItems} />
+        <AddInventoryItemDialog onAddItem={addInventoryItem} />
       </div>
 
       {/* Stats */}

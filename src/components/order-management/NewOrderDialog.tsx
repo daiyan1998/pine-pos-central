@@ -9,8 +9,6 @@ import { Plus, UtensilsCrossed } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { FoodSelectionDialog } from "./FoodSelectionDialog";
 import { useRestaurant } from "@/contexts/RestaurantContext";
-import { useGetTables } from "@/api/queries/tables";
-import { useCreateOrder } from "@/api/mutations/order";
 
 interface OrderItem {
   id: string;
@@ -21,30 +19,54 @@ interface OrderItem {
 }
 
 export const NewOrderDialog = () => {
-  const {  tables } = useRestaurant();
+  const { addOrder, tables } = useRestaurant();
   const [open, setOpen] = useState(false);
   const [foodDialogOpen, setFoodDialogOpen] = useState(false);
-  const [orderType, setOrderType] = useState<'DINE_IN' | 'TAKEAWAY' | 'DELIVERY'>('DINE_IN');
+  const [orderType, setOrderType] = useState<'dine-in' | 'takeaway' | 'delivery'>('dine-in');
   const [tableNumber, setTableNumber] = useState("");
-  const [tableId,setTableId] = useState("")
   const [customerName, setCustomerName] = useState("");
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
-
-  const getTables = useGetTables()
-  const createOrder = useCreateOrder()
-
+  const { toast } = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (orderType === 'dine-in' && !tableNumber) {
+      toast({
+        title: "Error",
+        description: "Please select a table number for dine-in orders",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    createOrder.mutate({ orderType, tableNumber, customerName, orderItems,tableId })
+    if ((orderType === 'takeaway' || orderType === 'delivery') && !customerName) {
+      toast({
+        title: "Error",
+        description: "Please enter customer name for takeaway/delivery orders",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    addOrder({
+      tableNumber: orderType === 'dine-in' ? parseInt(tableNumber) : 0,
+      orderType,
+      customerName: orderType !== 'dine-in' ? customerName : undefined,
+      items: orderItems,
+    });
+
+    toast({
+      title: "Success",
+      description: "New order created successfully",
+    });
 
     resetForm();
     setOpen(false);
   };
 
   const resetForm = () => {
-    setOrderType('DINE_IN');
+    setOrderType('dine-in');
     setTableNumber("");
     setCustomerName("");
     setOrderItems([]);
@@ -74,8 +96,7 @@ export const NewOrderDialog = () => {
   };
 
   // --- NEW: Available tables logic
-  const availableTables = getTables.data?.data.filter((t) => t.status === "AVAILABLE");
-
+  const availableTables = tables.filter((t) => t.status === "available");
 
   return (
     <>
@@ -93,27 +114,25 @@ export const NewOrderDialog = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="orderType">Order Type</Label>
-              <Select value={orderType} onValueChange={(value: 'DINE_IN' | 'TAKEAWAY' | 'DELIVERY') => setOrderType(value)}>
+              <Select value={orderType} onValueChange={(value: 'dine-in' | 'takeaway' | 'delivery') => setOrderType(value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select order type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="DINE_IN">Dine In</SelectItem>
-                  <SelectItem value="TAKEAWAY">Takeaway</SelectItem>
-                  <SelectItem value="DELIVERY">Delivery</SelectItem>
+                  <SelectItem value="dine-in">Dine In</SelectItem>
+                  <SelectItem value="takeaway">Takeaway</SelectItem>
+                  <SelectItem value="delivery">Delivery</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
-            {orderType === 'DINE_IN' && (
+            {orderType === 'dine-in' && (
               <div className="space-y-2">
                 <Label htmlFor="tableNumber">Table Number</Label>
-                {availableTables?.length === 0 && <p className="text-sm text-muted-foreground">No tables available</p>}
-                {availableTables?.length > 0 && 
                 <Select
                   value={tableNumber}
-                  onValueChange={setTableId}
-                  disabled={availableTables?.length === 0}
+                  onValueChange={setTableNumber}
+                  disabled={availableTables.length === 0}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder={availableTables.length === 0 ? "No tables available" : "Select a table"} />
@@ -122,16 +141,16 @@ export const NewOrderDialog = () => {
                     {availableTables.length === 0 ? (
                       <SelectItem value="" disabled>No tables available</SelectItem>
                     ) : availableTables.map(table => (
-                      <SelectItem key={table.id} value={String(table.id)}>
-                        Table {table.tableNumber} ({table.capacity} seats)
+                      <SelectItem key={table.id} value={String(table.number)}>
+                        Table {table.number} ({table.seats} seats)
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                }
               </div>
             )}
 
+            {(orderType === 'takeaway' || orderType === 'delivery') && (
               <div className="space-y-2">
                 <Label htmlFor="customerName">Customer Name</Label>
                 <Input
@@ -141,6 +160,7 @@ export const NewOrderDialog = () => {
                   placeholder="Enter customer name"
                 />
               </div>
+            )}
 
             {/* Food Items Section */}
             <div className="space-y-2">

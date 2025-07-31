@@ -33,7 +33,7 @@ export const EditMenuItemDialog = ({ item, onEditItem }: EditMenuItemDialogProps
     defaultValues: {
       name: item.name,
       category: item.category,
-      price: item.price,
+      price: item.price.toString(),
       description: item.description,
     },
   });
@@ -42,7 +42,7 @@ export const EditMenuItemDialog = ({ item, onEditItem }: EditMenuItemDialogProps
     form.reset({
       name: item.name,
       category: item.category,
-      price: item.price,
+      price: item.price.toString(),
       description: item.description,
     });
   }, [item, form]);

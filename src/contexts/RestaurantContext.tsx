@@ -1,7 +1,33 @@
-import { useGetOrderById } from "@/api/queries/order";
-import { Order, OrderItem, OrderType, OrderStatus, OrderItemStatus } from "@/types/order.type";
-import { Table, TableStatus } from "@/types/table.type";
-import React, { createContext, useContext, useState, ReactNode } from "react";
+
+import React, { createContext, useContext, useState, ReactNode } from 'react';
+
+interface OrderItem {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  notes?: string;
+}
+
+interface Order {
+  id: string;
+  tableNumber: number;
+  items: OrderItem[];
+  status: 'pending' | 'preparing' | 'ready' | 'served';
+  orderType: 'dine-in' | 'takeaway' | 'delivery';
+  total: number;
+  createdAt: string;
+  customerName?: string;
+}
+
+interface Table {
+  id: string;
+  number: number;
+  seats: number;
+  status: 'available' | 'occupied' | 'reserved';
+  currentOrder?: string;
+  reservationTime?: string;
+}
 
 interface Customer {
   id: string;
@@ -15,40 +41,27 @@ interface RestaurantContextType {
   orders: Order[];
   tables: Table[];
   customers: Customer[];
-  addOrder: (newOrder: {
-    tableId?: string;
-    orderType: OrderType;
+  addOrder: (newOrder: { 
+    tableNumber: number; 
+    orderType: 'dine-in' | 'takeaway' | 'delivery'; 
     customerName?: string;
-    customerPhone?: string;
-    items: Array<{
-      menuItemId: string;
-      variantId?: string;
-      quantity: number;
-      unitPrice: number;
-      notes?: string;
-    }>;
-    notes?: string;
+    items: OrderItem[];
   }) => void;
-  updateOrderStatus: (orderId: string, newStatus: OrderStatus) => void;
-  addTable: (newTable: { tableNumber: string; capacity: number; location?: string }) => void;
-  updateTableStatus: (
-    tableId: string,
-    status: TableStatus
-  ) => void;
-  addCustomer: (customer: Omit<Customer, "id" | "orderHistory">) => void;
+  updateOrderStatus: (orderId: string, newStatus: Order['status']) => void;
+  addTable: (newTable: { number: number; seats: number }) => void;
+  updateTableStatus: (tableId: string, status: Table['status'], orderId?: string) => void;
+  addCustomer: (customer: Omit<Customer, 'id' | 'orderHistory'>) => void;
   updateOrder: (orderId: string, updates: Partial<Order>) => void;
   printReceipt: (orderId: string) => void;
-  getTodaysSales: () => { totalRevenue: number; totalOrders: number };
+  getTodaysSales: () => { totalRevenue: number; totalOrders: number; };
 }
 
-const RestaurantContext = createContext<RestaurantContextType | undefined>(
-  undefined
-);
+const RestaurantContext = createContext<RestaurantContextType | undefined>(undefined);
 
 export const useRestaurant = () => {
   const context = useContext(RestaurantContext);
   if (context === undefined) {
-    throw new Error("useRestaurant must be used within a RestaurantProvider");
+    throw new Error('useRestaurant must be used within a RestaurantProvider');
   }
   return context;
 };
@@ -60,242 +73,180 @@ interface RestaurantProviderProps {
 export const RestaurantProvider = ({ children }: RestaurantProviderProps) => {
   const [orders, setOrders] = useState<Order[]>([
     {
-      id: "order-1",
-      orderNumber: "001",
-      tableId: "table-1",
-      orderType: OrderType.DINE_IN,
-      status: OrderStatus.PENDING,
-      customerName: "John Doe",
-      totalAmount: 25.98,
-      taxAmount: 2.60,
-      serviceCharge: 1.00,
-      discountAmount: 0,
-      finalAmount: 29.58,
-      notes: "No onions",
-      kotPrinted: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      createdBy: "user-1",
-      orderItems: [
-        {
-          id: "item-1",
-          orderId: "order-1",
-          menuItemId: "menu-1",
-          quantity: 2,
-          unitPrice: 12.99,
-          totalPrice: 25.98,
-          status: OrderItemStatus.PENDING,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
+      id: 'ORD001',
+      tableNumber: 5,
+      items: [
+        { id: '1', name: 'Chicken Burger', price: 12.99, quantity: 2 },
+        { id: '2', name: 'Coca Cola', price: 2.99, quantity: 2 }
       ],
+      status: 'preparing',
+      orderType: 'dine-in',
+      total: 31.96,
+      createdAt: '2025-06-14 12:30',
     },
-  ]);
-  
-  const [tables, setTables] = useState<Table[]>([
     {
-      id: "table-1",
-      tableNumber: "1",
-      capacity: 4,
-      status: TableStatus.AVAILABLE,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      createdBy: "user-1",
+      id: 'ORD002',
+      tableNumber: 2,
+      items: [
+        { id: '3', name: 'Caesar Salad', price: 8.99, quantity: 1 },
+        { id: '4', name: 'Margherita Pizza', price: 14.99, quantity: 1 }
+      ],
+      status: 'ready',
+      orderType: 'dine-in',
+      total: 23.98,
+      createdAt: '2025-06-14 12:15',
     },
+    {
+      id: 'ORD003',
+      tableNumber: 0,
+      items: [
+        { id: '5', name: 'Chicken Burger', price: 12.99, quantity: 1 }
+      ],
+      status: 'pending',
+      orderType: 'takeaway',
+      total: 12.99,
+      createdAt: '2025-06-14 12:45',
+      customerName: 'John Doe'
+    }
+  ]);
+
+  const [tables, setTables] = useState<Table[]>([
+    { id: '1', number: 1, seats: 2, status: 'available' },
+    { id: '2', number: 2, seats: 4, status: 'occupied', currentOrder: 'ORD002' },
+    { id: '3', number: 3, seats: 2, status: 'available' },
+    { id: '4', number: 4, seats: 6, status: 'reserved', reservationTime: '7:30 PM' },
+    { id: '5', number: 5, seats: 4, status: 'occupied', currentOrder: 'ORD001' },
+    { id: '6', number: 6, seats: 2, status: 'available' },
+    { id: '7', number: 7, seats: 4, status: 'available' },
+    { id: '8', number: 8, seats: 4, status: 'available' },
   ]);
 
   const [customers, setCustomers] = useState<Customer[]>([
-    {
-      id: "1",
-      name: "John Doe",
-      phone: "123-456-7890",
-      orderHistory: ["order-1"],
-    },
-    {
-      id: "2",
-      name: "Jane Smith",
-      email: "jane@example.com",
-      orderHistory: [],
-    },
+    { id: '1', name: 'John Doe', phone: '123-456-7890', orderHistory: ['ORD003'] },
+    { id: '2', name: 'Jane Smith', email: 'jane@example.com', orderHistory: [] }
   ]);
 
-  const addOrder = (newOrder: {
-    tableId?: string;
-    orderType: OrderType;
+  const addOrder = (newOrder: { 
+    tableNumber: number; 
+    orderType: 'dine-in' | 'takeaway' | 'delivery'; 
     customerName?: string;
-    customerPhone?: string;
-    items: Array<{
-      menuItemId: string;
-      variantId?: string;
-      quantity: number;
-      unitPrice: number;
-      notes?: string;
-    }>;
-    notes?: string;
+    items: OrderItem[];
   }) => {
-    const id = `order-${Date.now()}`;
-    const orderNumber = `${orders.length + 1}`.padStart(3, "0");
-    const totalAmount = newOrder.items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
-    const taxAmount = +(totalAmount * 0.1).toFixed(2); // Example 10% tax
-    const serviceCharge = +(totalAmount * 0.05).toFixed(2); // Example 5% service charge
-    const discountAmount = 0;
-    const finalAmount = +(totalAmount + taxAmount + serviceCharge - discountAmount).toFixed(2);
-    const createdAt = new Date().toISOString();
-    const updatedAt = createdAt;
-    const createdBy = "user-1";
-    const orderItems: OrderItem[] = newOrder.items.map((item, idx) => ({
-      id: `item-${Date.now()}-${idx}`,
-      orderId: id,
-      menuItemId: item.menuItemId,
-      variantId: item.variantId,
-      quantity: item.quantity,
-      unitPrice: item.unitPrice,
-      totalPrice: +(item.unitPrice * item.quantity).toFixed(2),
-      notes: item.notes,
-      status: OrderItemStatus.PENDING,
-      createdAt,
-      updatedAt,
-    }));
+    const total = newOrder.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    
     const order: Order = {
-      id,
-      orderNumber,
-      tableId: newOrder.tableId,
+      id: `ORD${String(orders.length + 1).padStart(3, '0')}`,
+      tableNumber: newOrder.tableNumber,
+      items: newOrder.items,
+      status: 'pending',
       orderType: newOrder.orderType,
-      status: OrderStatus.PENDING,
-      customerName: newOrder.customerName,
-      customerPhone: newOrder.customerPhone,
-      totalAmount,
-      taxAmount,
-      serviceCharge,
-      discountAmount,
-      finalAmount,
-      notes: newOrder.notes,
-      kotPrinted: false,
-      createdAt,
-      updatedAt,
-      createdBy,
-      orderItems,
+      total,
+      createdAt: new Date().toLocaleString(),
+      customerName: newOrder.customerName
     };
-    setOrders((prev) => [...prev, order]);
+
+    setOrders(prev => [...prev, order]);
+
     // Update table status if it's a dine-in order
-    if (newOrder.orderType === OrderType.DINE_IN && newOrder.tableId) {
-      setTables((prev) =>
-        prev.map((table) =>
-          table.id === newOrder.tableId
-            ? { ...table, status: TableStatus.OCCUPIED }
-            : table
-        )
-      );
+    if (newOrder.orderType === 'dine-in' && newOrder.tableNumber > 0) {
+      setTables(prev => prev.map(table => 
+        table.number === newOrder.tableNumber 
+          ? { ...table, status: 'occupied' as const, currentOrder: order.id }
+          : table
+      ));
     }
+
     // Add customer if not exists
-    if (newOrder.customerName) {
-      const existingCustomer = customers.find(
-        (c) => c.name.toLowerCase() === newOrder.customerName!.toLowerCase()
-      );
+    if (newOrder.customerName && (newOrder.orderType === 'takeaway' || newOrder.orderType === 'delivery')) {
+      const existingCustomer = customers.find(c => c.name.toLowerCase() === newOrder.customerName!.toLowerCase());
       if (!existingCustomer) {
-        addCustomer({ name: newOrder.customerName, phone: newOrder.customerPhone });
+        addCustomer({ name: newOrder.customerName });
       }
       // Update customer order history
-      setCustomers((prev) =>
-        prev.map((customer) =>
-          customer.name.toLowerCase() === newOrder.customerName!.toLowerCase()
-            ? {
-                ...customer,
-                orderHistory: [...customer.orderHistory, id],
-              }
-            : customer
-        )
-      );
+      setCustomers(prev => prev.map(customer => 
+        customer.name.toLowerCase() === newOrder.customerName!.toLowerCase()
+          ? { ...customer, orderHistory: [...customer.orderHistory, order.id] }
+          : customer
+      ));
     }
   };
 
-  const updateOrderStatus = (orderId: string, newStatus: OrderStatus) => {
-    setOrders((prev) =>
-      prev.map((order) =>
-        order.id === orderId ? { ...order, status: newStatus } : order
-      )
-    );
+  const updateOrderStatus = (orderId: string, newStatus: Order['status']) => {
+    setOrders(prev => prev.map(order => 
+      order.id === orderId ? { ...order, status: newStatus } : order
+    ));
+
     // If order is served, free up the table
-    if (newStatus === OrderStatus.SERVED) {
-      const order = orders.find((o) => o.id === orderId);
-      if (order && order.orderType === OrderType.DINE_IN && order.tableId) {
-        setTables((prev) =>
-          prev.map((table) =>
-            table.id === order.tableId
-              ? { ...table, status: TableStatus.AVAILABLE }
-              : table
-          )
-        );
+    if (newStatus === 'served') {
+      const order = orders.find(o => o.id === orderId);
+      if (order && order.orderType === 'dine-in') {
+        setTables(prev => prev.map(table => 
+          table.number === order.tableNumber 
+            ? { ...table, status: 'available' as const, currentOrder: undefined }
+            : table
+        ));
       }
     }
   };
 
-  const addTable = (newTable: { tableNumber: string; capacity: number; location?: string }) => {
+  const addTable = (newTable: { number: number; seats: number }) => {
     const table: Table = {
-      id: `table-${Date.now()}`,
-      tableNumber: newTable.tableNumber,
-      capacity: newTable.capacity,
-      status: TableStatus.AVAILABLE,
-      location: newTable.location,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      createdBy: "user-1",
+      id: `${Date.now()}`,
+      number: newTable.number,
+      seats: newTable.seats,
+      status: 'available'
     };
-    setTables((prev) => [...prev, table]);
+    setTables(prev => [...prev, table]);
   };
 
-  const updateTableStatus = (
-    tableId: string,
-    status: TableStatus
-  ) => {
-    setTables((prev) =>
-      prev.map((table) =>
-        table.id === tableId ? { ...table, status } : table
-      )
-    );
+  const updateTableStatus = (tableId: string, status: Table['status'], orderId?: string) => {
+    setTables(prev => prev.map(table => 
+      table.id === tableId 
+        ? { ...table, status, currentOrder: orderId }
+        : table
+    ));
   };
 
-  const addCustomer = (customer: Omit<Customer, "id" | "orderHistory">) => {
+  const addCustomer = (customer: Omit<Customer, 'id' | 'orderHistory'>) => {
     const newCustomer: Customer = {
       id: `CUST${Date.now()}`,
       ...customer,
-      orderHistory: [],
+      orderHistory: []
     };
-    setCustomers((prev) => [...prev, newCustomer]);
+    setCustomers(prev => [...prev, newCustomer]);
   };
 
   const updateOrder = (orderId: string, updates: Partial<Order>) => {
-    setOrders((prev) =>
-      prev.map((order) =>
-        order.id === orderId ? { ...order, ...updates } : order
-      )
-    );
+    setOrders(prev => prev.map(order => 
+      order.id === orderId ? { ...order, ...updates } : order
+    ));
   };
 
-  const printReceipt = (order: any) => {
+  const printReceipt = (orderId: string) => {
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return;
+
     const receiptContent = `
 === POSPine Restaurant ===
-Receipt #${order.orderNumber}
+Receipt #${order.id}
 Date: ${order.createdAt}
-${order.orderType === OrderType.DINE_IN ? `Table: ${order.tableId}` : `Customer: ${order.customerName}`}
+${order.orderType === 'dine-in' ? `Table: ${order.tableNumber}` : `Customer: ${order.customerName}`}
 
 Items:
-${order.orderItems?.map(
-  (item) =>
-    `${item.quantity}x ${item.menuItemId} - $${(item.unitPrice * item.quantity).toFixed(2)}`
-  ).join("\n")}
+${order.items.map(item => `${item.quantity}x ${item.name} - $${(item.price * item.quantity).toFixed(2)}`).join('\n')}
 
-Total: $${order.finalAmount.toFixed(2)}
+Total: $${order.total.toFixed(2)}
 
 Thank you for your visit!
 `;
+
     // Create a new window for printing
-    const printWindow = window.open("", "_blank");
+    const printWindow = window.open('', '_blank');
     if (printWindow) {
       printWindow.document.write(`
         <html>
           <head>
-            <title>Receipt #${order.orderNumber}</title>
+            <title>Receipt #${order.id}</title>
             <style>
               body { font-family: monospace; padding: 20px; }
               pre { white-space: pre-wrap; }
@@ -313,14 +264,13 @@ Thank you for your visit!
 
   const getTodaysSales = () => {
     const today = new Date().toDateString();
-    const todaysOrders = orders.filter(
-      (order) =>
-        order.status === OrderStatus.SERVED &&
-        new Date(order.createdAt).toDateString() === today
+    const todaysOrders = orders.filter(order => 
+      order.status === 'served' && new Date(order.createdAt).toDateString() === today
     );
+    
     return {
-      totalRevenue: todaysOrders.reduce((sum, order) => sum + order.finalAmount, 0),
-      totalOrders: todaysOrders.length,
+      totalRevenue: todaysOrders.reduce((sum, order) => sum + order.total, 0),
+      totalOrders: todaysOrders.length
     };
   };
 

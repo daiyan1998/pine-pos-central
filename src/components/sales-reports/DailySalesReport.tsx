@@ -3,37 +3,34 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, DollarSign, ShoppingCart, TrendingUp } from "lucide-react";
 import { useRestaurant } from "@/contexts/RestaurantContext";
-import { useGetOrders } from "@/api/queries/order";
 
 export const DailySalesReport = () => {
-  const {  getTodaysSales } = useRestaurant();
+  const { orders, getTodaysSales } = useRestaurant();
   const { totalRevenue, totalOrders } = getTodaysSales();
-  const {data} = useGetOrders();
-  const orders = data?.data
 
   const getOrdersByStatus = () => {
     const today = new Date().toDateString();
-    const todaysOrders = orders?.filter(order => 
+    const todaysOrders = orders.filter(order => 
       new Date(order.createdAt).toDateString() === today
     );
 
     return {
-      pending: todaysOrders?.filter(o => o.status === 'pending').length,
-      preparing: todaysOrders?.filter(o => o.status === 'preparing').length,
-      ready: todaysOrders?.filter(o => o.status === 'ready').length,
-      served: todaysOrders?.filter(o => o.status === 'served').length,
+      pending: todaysOrders.filter(o => o.status === 'pending').length,
+      preparing: todaysOrders.filter(o => o.status === 'preparing').length,
+      ready: todaysOrders.filter(o => o.status === 'ready').length,
+      served: todaysOrders.filter(o => o.status === 'served').length,
     };
   };
 
   const getTopItems = () => {
     const today = new Date().toDateString();
-    const todaysOrders = orders?.filter(order => 
+    const todaysOrders = orders.filter(order => 
       new Date(order.createdAt).toDateString() === today
     );
 
     const itemCounts: { [key: string]: number } = {};
-    todaysOrders?.forEach(order => {
-      order.items?.forEach(item => {
+    todaysOrders.forEach(order => {
+      order.items.forEach(item => {
         itemCounts[item.name] = (itemCounts[item.name] || 0) + item.quantity;
       });
     });

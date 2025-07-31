@@ -7,9 +7,23 @@ import { Label } from "@/components/ui/label";
 import { Edit, Plus, Minus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useRestaurant } from "@/contexts/RestaurantContext";
-import { Order } from "@/types/order.type";
 
-
+interface Order {
+  id: string;
+  tableNumber: number;
+  items: Array<{
+    id: string;
+    name: string;
+    price: number;
+    quantity: number;
+    notes?: string;
+  }>;
+  status: 'pending' | 'preparing' | 'ready' | 'served';
+  orderType: 'dine-in' | 'takeaway' | 'delivery';
+  total: number;
+  createdAt: string;
+  customerName?: string;
+}
 
 interface EditOrderDialogProps {
   order: Order;
@@ -18,7 +32,7 @@ interface EditOrderDialogProps {
 export const EditOrderDialog = ({ order }: EditOrderDialogProps) => {
   const { updateOrder } = useRestaurant();
   const [open, setOpen] = useState(false);
-  const [items, setItems] = useState(order.orderItems);
+  const [items, setItems] = useState(order.items);
   const { toast } = useToast();
 
   const handleQuantityChange = (itemId: string, newQuantity: number) => {
@@ -40,7 +54,7 @@ export const EditOrderDialog = ({ order }: EditOrderDialogProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const newTotal = items.reduce((sum, item) => sum + (item.totalPrice * item.quantity), 0);
+    const newTotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     
     updateOrder(order.id, {
       items,
@@ -55,7 +69,7 @@ export const EditOrderDialog = ({ order }: EditOrderDialogProps) => {
     setOpen(false);
   };
 
-  const canEdit = order.status === 'PENDING' || order.status === 'IN_PREPARATION';
+  const canEdit = order.status === 'pending' || order.status === 'preparing';
 
   if (!canEdit) {
     return null;
@@ -78,8 +92,8 @@ export const EditOrderDialog = ({ order }: EditOrderDialogProps) => {
             {items.map((item) => (
               <div key={item.id} className="border rounded-lg p-3 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="font-medium">{item.menuItem.name}</span>
-                  <span className="text-sm text-gray-600">${item.totalPrice} each</span>
+                  <span className="font-medium">{item.name}</span>
+                  <span className="text-sm text-gray-600">${item.price.toFixed(2)} each</span>
                 </div>
                 
                 <div className="flex items-center gap-3">
@@ -104,7 +118,7 @@ export const EditOrderDialog = ({ order }: EditOrderDialogProps) => {
                     </Button>
                   </div>
                   <span className="ml-auto font-medium">
-                    ${(item.unitPrice * item.quantity)}
+                    ${(item.price * item.quantity).toFixed(2)}
                   </span>
                 </div>
                 
@@ -123,7 +137,7 @@ export const EditOrderDialog = ({ order }: EditOrderDialogProps) => {
           
           <div className="border-t pt-3 flex justify-between items-center">
             <span className="text-lg font-semibold">
-              Total: ${items.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0)}
+              Total: ${items.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2)}
             </span>
           </div>
 
