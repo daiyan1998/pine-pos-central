@@ -11,6 +11,7 @@ import { BillingPayments } from "@/components/billing-payments/BillingPayments";
 import { SalesReports } from "@/components/sales-reports/SalesReports";
 import { InventoryManagement } from "@/components/inventory-management/InventoryManagement";
 import { StaffManagement } from "@/components/staff-management/StaffManagement";
+import { Settings } from "@/components/settings/Settings";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { RestaurantProvider } from "@/contexts/RestaurantContext";
 import { useState } from "react";
@@ -57,6 +58,8 @@ const Index = () => {
         return <InventoryManagement />;
       case "staff":
         return <StaffManagement />;
+      case "settings":
+        return <Settings />;
       default:
         return <Dashboard onNavigate={setActiveView} />;
     }
