@@ -11,36 +11,7 @@ import { Plus, Edit, Trash2, Search, Eye } from 'lucide-react';
 
 const OrderManagement = () => {
   debugger
-  const [orders, setOrders] = useState([
-    {
-      id: '1',
-      orderNumber: 'ORD-001',
-      tableId: '1',
-      tableName: 'Table 1',
-      orderType: 'DINE_IN',
-      status: 'PENDING',
-      customerName: 'John Doe',
-      customerPhone: '+1234567890',
-      totalAmount: 45.50,
-      finalAmount: 45.50,
-      createdAt: new Date('2024-01-01T12:00:00'),
-      items: 3,
-    },
-    {
-      id: '2',
-      orderNumber: 'ORD-002',
-      tableId: null,
-      tableName: null,
-      orderType: 'TAKEAWAY',
-      status: 'IN_PREPARATION',
-      customerName: 'Jane Smith',
-      customerPhone: '+1234567891',
-      totalAmount: 28.75,
-      finalAmount: 28.75,
-      createdAt: new Date('2024-01-01T12:30:00'),
-      items: 2,
-    },
-  ]);
+  const [orders, setOrders] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');

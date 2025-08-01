@@ -42,7 +42,7 @@ export const OrderManagement = () => {
   const getOrders = useGetOrders()
   const {mutate: updateOrderStatus} = useUpdateOrderStatus()
   // const getOrder = useGetOrderById()
-  const orders = getOrders.data?.data
+  const orders = getOrders.data?.data.orders
 
   const getStatusColor = (status: string) => {
     switch (status) {

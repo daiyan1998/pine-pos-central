@@ -18,9 +18,10 @@ export const KitchenDisplay = () => {
   const getOrders = useGetOrders()
   const updateOrder = useUpdateMenuItem()
   const { mutate: updateOrderStatus } = useUpdateOrderStatus()
-  const orders : Order[] = getOrders.data?.data || []
+  const orders : Order[] = getOrders.data?.orders || []
 
  
+  console.log("orders",orders)
   // Convert orders to kitchen format
   const kitchenOrders = orders
     .filter((order: Order) => order.status !== "SERVED")

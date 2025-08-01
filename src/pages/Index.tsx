@@ -19,6 +19,7 @@ import UserDashboard from "./UserDashboard";
 import CategoryManagement from "@/components/admin/domains/CategoryManagement";
 import { LogOut } from "lucide-react";
 import { useLogout } from "@/api/mutations/auth";
+import { Settings } from "@/components/settings/Settings";
 
 const Index = () => {
   const [activeView, setActiveView] = useState("dashboard");
@@ -73,6 +74,8 @@ const Index = () => {
         return <StaffManagement />;
       case "category":
         return <CategoryManagement />;
+      case "settings":
+        return <Settings/>
       default:
         return <Dashboard onNavigate={setActiveView} />;
     }

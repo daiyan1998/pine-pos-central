@@ -10,6 +10,7 @@ import { EditMenuItemDialog } from "./EditMenuItemDialog";
 import { useGetMenuItems } from "@/api/queries/menu";
 import { MenuItem } from "@/types/menu.type";
 import { useCreateMenuItem, useDeleteMenuItem, useUpdateMenuItem } from "@/api/mutations/menu";
+import { useGetCategories } from "@/api/queries/category";
 
 
 
@@ -22,8 +23,10 @@ export const MenuManagement = () => {
   const updateMenuItem = useUpdateMenuItem()
   const {mutate: createMenuItem} = useCreateMenuItem()
   const {mutate: deleteMenuItem} = useDeleteMenuItem()
+  const {data:categories,isLoading} = useGetCategories()
+  const categoriesData = categories?.data || []
 
-  // const [menuItems, setMenuItems] = useState<MenuItem[]>(getMenuItems.data?.data || [])
+
   const menuItems: MenuItem[] = getMenuItems.data?.data || []
 
   const addMenuItem = (newItem) => {
@@ -32,19 +35,24 @@ export const MenuManagement = () => {
 
 
 
-  const categories = [
-    { id: 'all', name: 'All Items', count: menuItems.length },
-    { id: 'starters', name: 'Starters', count: menuItems.filter(item => item.category === 'starters').length },
-    { id: 'main', name: 'Main Course', count: menuItems.filter(item => item.category === 'main').length },
-    { id: 'beverages', name: 'Beverages', count: menuItems.filter(item => item.category === 'beverages').length },
-    { id: 'desserts', name: 'Desserts', count: menuItems.filter(item => item.category === 'desserts').length }
-  ];
+  // const categories = [
+  //   { id: 'all', name: 'All Items', count: menuItems.length },
+  //   { id: 'starters', name: 'Starters', count: menuItems.filter(item => item.category === 'starters').length },
+  //   { id: 'main', name: 'Main Course', count: menuItems.filter(item => item.category === 'main').length },
+  //   { id: 'beverages', name: 'Beverages', count: menuItems.filter(item => item.category === 'beverages').length },
+  //   { id: 'desserts', name: 'Desserts', count: menuItems.filter(item => item.category === 'desserts').length }
+  // ];
 
   const filteredItems = menuItems.filter(item => {
+    console.log('filteredItems',item)
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
+    console.log('matchesCategory',matchesCategory)
+    console.log('matchesSearch',matchesSearch)
     return matchesSearch && matchesCategory;
   });
+
+  console.log('filteredItems',filteredItems)
 
   const toggleAvailability = (id: string) => {
     updateMenuItem.mutate({
@@ -52,6 +60,8 @@ export const MenuManagement = () => {
       isActive: !menuItems.find(item => item.id === id)?.isActive
     })
   };
+
+  if (isLoading) return <div>Loading...</div>
 
   return (
     <div className="space-y-6">
@@ -80,7 +90,7 @@ export const MenuManagement = () => {
       {/* Categories */}
       <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full">
         <TabsList className="grid w-full grid-cols-5 bg-gray-100">
-          {categories.map((category) => (
+          {categoriesData.map((category) => (
             <TabsTrigger 
               key={category.id} 
               value={category.id}

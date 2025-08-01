@@ -142,12 +142,17 @@ export function AppSidebar({ activeItem, onItemClick }: AppSidebarProps) {
       </SidebarContent>
       
       <SidebarFooter className="p-4 border-t border-gray-200">
-        <div className="space-y-2">
-          <div className="flex items-center gap-3 text-sm text-gray-600">
-            <Settings className="w-4 h-4" />
-            <span>Settings</span>
-          </div>
-        </div>
+        <button
+          onClick={() => onItemClick("settings")}
+          className={`flex items-center gap-3 text-sm w-full p-2 rounded-lg transition-all duration-200 ${
+            activeItem === "settings"
+              ? 'bg-blue-50 text-blue-700 border-blue-200'
+              : 'hover:bg-gray-50 text-gray-600'
+          }`}
+        >
+          <Settings className="w-4 h-4" />
+          <span>Settings</span>
+        </button>
       </SidebarFooter>
     </Sidebar>
   );
