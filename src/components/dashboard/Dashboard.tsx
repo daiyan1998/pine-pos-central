@@ -10,16 +10,22 @@ import {
   AlertCircle,
   Calendar
 } from "lucide-react";
+import { useGetDashboard } from "@/api/queries/dashboard";
+import { formatDistanceToNow } from "date-fns";
 
 interface DashboardProps {
   onNavigate?: (view: string) => void;
 }
 
 export const Dashboard = ({ onNavigate }: DashboardProps) => {
+  const {data,isLoading} = useGetDashboard()
+
+  const dashboard = data?.data || {};
+
   const stats = [
     {
       title: "Today's Sales",
-      value: "$2,847.50",
+      value: dashboard.todaysSales?.totalRevenue,
       change: "+12.5%",
       icon: DollarSign,
       color: "text-green-600",
@@ -27,7 +33,7 @@ export const Dashboard = ({ onNavigate }: DashboardProps) => {
     },
     {
       title: "Orders",
-      value: "156",
+      value: dashboard.todaysSales?.totalOrders,
       change: "+8.2%",
       icon: ShoppingCart,
       color: "text-blue-600",
@@ -51,29 +57,30 @@ export const Dashboard = ({ onNavigate }: DashboardProps) => {
     }
   ];
 
-  const recentOrders = [
-    { id: "#001", table: "Table 5", items: 3, total: "$45.50", status: "preparing", time: "2 min ago" },
-    { id: "#002", table: "Table 2", items: 2, total: "$28.00", status: "ready", time: "5 min ago" },
-    { id: "#003", table: "Table 8", items: 4, total: "$62.75", status: "served", time: "12 min ago" },
-    { id: "#004", table: "Table 1", items: 1, total: "$15.25", status: "pending", time: "15 min ago" },
-  ];
+
+  // const recentOrders = [
+  //   { id: "#001", table: "Table 5", items: 3, total: "$45.50", status: "preparing", time: "2 min ago" },
+  //   { id: "#002", table: "Table 2", items: 2, total: "$28.00", status: "ready", time: "5 min ago" },
+  //   { id: "#003", table: "Table 8", items: 4, total: "$62.75", status: "served", time: "12 min ago" },
+  //   { id: "#004", table: "Table 1", items: 1, total: "$15.25", status: "pending", time: "15 min ago" },
+  // ];
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'preparing': return 'bg-blue-100 text-blue-800';
-      case 'ready': return 'bg-green-100 text-green-800';
-      case 'served': return 'bg-gray-100 text-gray-800';
+      case 'PENDING': return 'bg-yellow-100 text-yellow-800';
+      case 'IN_PREPARATION': return 'bg-blue-100 text-blue-800';
+      case 'READY': return 'bg-green-100 text-green-800';
+      case 'SERVED': return 'bg-gray-100 text-gray-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'pending': return <AlertCircle className="w-3 h-3" />;
-      case 'preparing': return <Clock className="w-3 h-3" />;
-      case 'ready': return <CheckCircle className="w-3 h-3" />;
-      case 'served': return <CheckCircle className="w-3 h-3" />;
+      case 'PENDING': return <AlertCircle className="w-3 h-3" />;
+      case 'IN_PREPARATION': return <Clock className="w-3 h-3" />;
+      case 'READY': return <CheckCircle className="w-3 h-3" />;
+      case 'SERVED': return <CheckCircle className="w-3 h-3" />;
       default: return <Clock className="w-3 h-3" />;
     }
   };
@@ -85,6 +92,7 @@ export const Dashboard = ({ onNavigate }: DashboardProps) => {
     }
   };
 
+  if(isLoading) return <div>Loading...</div>
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -129,17 +137,17 @@ export const Dashboard = ({ onNavigate }: DashboardProps) => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {recentOrders.map((order) => (
+            {dashboard.recentOrders?.map((order) => (
               <div key={order.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="font-medium text-gray-900">{order.id}</span>
                     <Badge variant="outline" className="text-xs">
-                      {order.table}
+                      {order.table.tableNumber}
                     </Badge>
                   </div>
                   <div className="flex items-center gap-4 text-sm text-gray-600">
-                    <span>{order.items} items</span>
+                    <span>{order.orderItems.length} items</span>
                     <span className="font-medium text-gray-900">{order.total}</span>
                   </div>
                 </div>
@@ -148,7 +156,7 @@ export const Dashboard = ({ onNavigate }: DashboardProps) => {
                     {getStatusIcon(order.status)}
                     {order.status}
                   </Badge>
-                  <span className="text-xs text-gray-500">{order.time}</span>
+                  <span className="text-xs text-gray-500">{formatDistanceToNow(order.createdAt,{addSuffix: true}) }</span>
                 </div>
               </div>
             ))}

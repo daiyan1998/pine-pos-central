@@ -18,7 +18,7 @@ export const KitchenDisplay = () => {
   const getOrders = useGetOrders()
   const updateOrder = useUpdateMenuItem()
   const { mutate: updateOrderStatus } = useUpdateOrderStatus()
-  const orders : Order[] = getOrders.data?.orders || []
+  const orders : Order[] = getOrders.data?.data.orders || []
 
  
   console.log("orders",orders)

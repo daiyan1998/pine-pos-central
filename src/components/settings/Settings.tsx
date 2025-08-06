@@ -34,26 +34,26 @@ export function Settings() {
 
       <Tabs defaultValue="general" className="space-y-6">
         <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="general" className="flex items-center gap-2">
+          {/* <TabsTrigger value="general" className="flex items-center gap-2">
             <Store className="w-4 h-4" />
             General
-          </TabsTrigger>
+          </TabsTrigger> */}
           <TabsTrigger value="profile" className="flex items-center gap-2">
             <User className="w-4 h-4" />
             Profile
           </TabsTrigger>
-          <TabsTrigger value="notifications" className="flex items-center gap-2">
+          {/* <TabsTrigger value="notifications" className="flex items-center gap-2">
             <Bell className="w-4 h-4" />
             Notifications
-          </TabsTrigger>
+          </TabsTrigger> */}
           <TabsTrigger value="security" className="flex items-center gap-2">
             <Shield className="w-4 h-4" />
             Security
           </TabsTrigger>
-          <TabsTrigger value="appearance" className="flex items-center gap-2">
+          {/* <TabsTrigger value="appearance" className="flex items-center gap-2">
             <Palette className="w-4 h-4" />
             Appearance
-          </TabsTrigger>
+          </TabsTrigger> */}
         </TabsList>
 
         <TabsContent value="general" className="space-y-6">
@@ -237,7 +237,7 @@ export function Settings() {
             </form>
           </Form>
 
-          <Card>
+          {/* <Card>
             <CardHeader>
               <CardTitle>Two-Factor Authentication</CardTitle>
               <CardDescription>Add an extra layer of security to your account</CardDescription>
@@ -251,7 +251,7 @@ export function Settings() {
                 <Switch />
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
         </TabsContent>
 
         <TabsContent value="appearance" className="space-y-6">

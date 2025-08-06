@@ -44,9 +44,8 @@ export const MenuManagement = () => {
   // ];
 
   const filteredItems = menuItems.filter(item => {
-    console.log('filteredItems',item)
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
+    const matchesCategory = selectedCategory === 'all' || item.category.id === selectedCategory;
     console.log('matchesCategory',matchesCategory)
     console.log('matchesSearch',matchesSearch)
     return matchesSearch && matchesCategory;

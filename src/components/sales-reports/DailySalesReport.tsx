@@ -9,7 +9,7 @@ export const DailySalesReport = () => {
   const {  getTodaysSales } = useRestaurant();
   const { totalRevenue, totalOrders } = getTodaysSales();
   const {data} = useGetOrders();
-  const orders = data?.data
+  const orders = data?.data.orders || []
 
   const getOrdersByStatus = () => {
     const today = new Date().toDateString();
