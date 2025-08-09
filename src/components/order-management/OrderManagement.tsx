@@ -5,6 +5,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { 
+  Pagination, 
+  PaginationContent, 
+  PaginationItem, 
+  PaginationLink, 
+  PaginationNext, 
+  PaginationPrevious 
+} from "@/components/ui/pagination";
 import { Search, Clock, CheckCircle, ChefHat, Utensils, Printer } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { NewOrderDialog } from "./NewOrderDialog";
@@ -35,6 +43,8 @@ export const OrderManagement = () => {
   const { orders, updateOrderStatus, printReceipt } = useRestaurant();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
   
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -79,6 +89,22 @@ export const OrderManagement = () => {
     return matchesSearch && matchesStatus;
   });
 
+  // Pagination logic
+  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedOrders = filteredOrders.slice(startIndex, startIndex + itemsPerPage);
+
+  // Reset to first page when filters change
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+  };
+
+  const handleStatusChange = (value: string) => {
+    setSelectedStatus(value);
+    setCurrentPage(1);
+  };
+
   const getNextStatus = (currentStatus: any) => {
     switch (currentStatus) {
       case 'pending': return 'preparing';
@@ -106,11 +132,11 @@ export const OrderManagement = () => {
           <Input
             placeholder="Search orders..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             className="pl-10"
           />
         </div>
-        <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+        <Select value={selectedStatus} onValueChange={handleStatusChange}>
           <SelectTrigger className="w-full sm:w-48">
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
@@ -150,7 +176,7 @@ export const OrderManagement = () => {
 
       {/* Orders List */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {filteredOrders.map((order) => (
+        {paginatedOrders.map((order) => (
           <Card key={order.id} className="border-0 shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
@@ -226,6 +252,52 @@ export const OrderManagement = () => {
       {filteredOrders.length === 0 && (
         <div className="text-center py-12">
           <p className="text-gray-500">No orders found matching your criteria.</p>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="mt-6">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious 
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (currentPage > 1) setCurrentPage(currentPage - 1);
+                  }}
+                  className={currentPage <= 1 ? "pointer-events-none opacity-50" : ""}
+                />
+              </PaginationItem>
+              
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <PaginationItem key={page}>
+                  <PaginationLink
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setCurrentPage(page);
+                    }}
+                    isActive={currentPage === page}
+                  >
+                    {page}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+              
+              <PaginationItem>
+                <PaginationNext 
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+                  }}
+                  className={currentPage >= totalPages ? "pointer-events-none opacity-50" : ""}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
         </div>
       )}
     </div>
