@@ -1,73 +1,42 @@
-# Welcome to your Lovable project
+# 🍽️ Restaurant POS System
 
-## Project info
+A modern Point of Sale (POS) system built for restaurants to manage orders, tables, menus, and billing with ease.  
+This project streamlines daily operations, improves customer service, and provides insights into sales and inventory.
 
-**URL**: https://lovable.dev/projects/32b3800c-318d-414c-b106-9bdfb61a1bda
+---
 
-## How can I edit this code?
+## 🎥 Demo
 
-There are several ways of editing your application.
+Watch the full walkthrough on YouTube:  
+[![POS System Demo](https://img.youtube.com/vi/ZX6cXKIrowo/0.jpg)](https://www.youtube.com/watch?v=ZX6cXKIrowo)
 
-**Use Lovable**
+---
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/32b3800c-318d-414c-b106-9bdfb61a1bda) and start prompting.
+## 🚀 Features
 
-Changes made via Lovable will be committed automatically to this repo.
+- **Order Management**: Take and track dine-in, takeaway, or delivery orders.  
+- **Table Management**: Assign, merge, and track tables efficiently.  
+- **Menu Management**: Add, edit, or remove food and beverage items with pricing and categories.  
+- **Billing & Invoices**: Generate bills instantly and manage payments (cash, card, digital).  
+- **User Roles**: Secure login with Admin, Manager, and Staff roles.  
+- **Inventory Tracking**: Keep track of stock and receive alerts on low inventory.  
+- **Sales Reports**: Daily/weekly/monthly reports with insights into top-selling items.  
 
-**Use your preferred IDE**
+---
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 🛠️ Tech Stack
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- **Frontend**: React / Shadcn
+- **Backend**: Node.js / Express.js  
+- **Database**: PostgreSQL (via Prisma ORM)  
+- **Authentication**: JWT  
+- **Deployment**: Vercel 
 
-Follow these steps:
+---
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## ⚡ Getting Started
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/32b3800c-318d-414c-b106-9bdfb61a1bda) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+### 1. Clone the repository
+```bash
+git clone https://github.com/your-username/restaurant-pos.git
+cd restaurant-pos
